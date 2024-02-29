@@ -8,6 +8,8 @@
 #include <string>
 #include <memory>
 #include <list>
+#include <fstream>
+#include <sstream>
 
 namespace zhou {
 
@@ -47,9 +49,16 @@ class LogAppender {
 public:
     typedef std::shared_ptr<LogAppender> ptr;
     virtual ~LogAppender() {}
-    void log(LogLevel::Level level, LogEvent::ptr event);
-private:
+
+    // log 函数为纯虚函数，需要由子类实现该方法
+    virtual void log(LogLevel::Level level, LogEvent::ptr event) = 0;
+
+    void setFormatter(LogFormatter::ptr formatter) { m_formatter = formatter; }
+    LogFormatter::ptr getFormatter() const { return m_formatter; }
+
+protected:
     LogLevel::Level m_level;
+    LogFormatter::ptr m_formatter;
 };
 
 // 日志格式
@@ -93,8 +102,28 @@ private:
 };
 
 
-class StdoutLogAppender : public LogAppender {};
-class FileLogAppender : public LogAppender {};
+class StdoutLogAppender : public LogAppender {
+public:
+    typedef std::shared_ptr<StdoutLogAppender> ptr;
+    virtual void log(LogLevel::Level level, LogEvent::ptr event) override;
+    
+private:
+
+
+};
+class FileLogAppender : public LogAppender {
+public:
+    typedef std::shared_ptr<FileLogAppender> ptr;
+
+    FileLogAppender(const std::string& filename);
+    virtual void log(LogLevel::Level level, LogEvent::ptr event) override;
+
+    bool reopen();
+private:
+    std::string m_filename;     // 需要输出到的文件名
+    std::ofstream m_filestream; // 文件流
+
+};
 
 
 }
