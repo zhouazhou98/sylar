@@ -1,6 +1,35 @@
 #include "zhou/log.h"
 
 #include <iostream>
+#include <map>
+#include <functional>
+#include <memory>
+
+namespace zhou{
+const char * LogLevel::ToString(LogLevel::Level level) {
+
+
+    switch(level) {
+    
+#define XX(name)            \
+    case LogLevel::name:    \
+        return #name;
+    
+    XX(TRACE)
+    XX(DEBUG)
+    XX(INFO)
+    XX(WARN)
+    XX(ERROR)
+    XX(FATAL)
+
+#undef XX    
+
+    default:
+        return "UNKNOWN";
+
+    }
+}
+}
 
 
 namespace zhou { // Logger
@@ -13,7 +42,7 @@ Logger::Logger(const std::string & name = "root")
 void Logger::log (LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
         for (auto iter = m_appenders.begin(); iter != m_appenders.end(); iter++)
-            (*iter)->log(level, event);
+            (*iter)->log(shared_from_this(), level, event);
     }
 }
 
@@ -64,9 +93,9 @@ namespace zhou { // LogAppender
 FileLogAppender::FileLogAppender(const std::string& filename) 
         : m_filename(filename) {
 }
-void FileLogAppender::log(LogLevel::Level level, LogEvent::ptr event) {
+void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
-        m_filestream << m_formatter->format(event);
+        m_filestream << m_formatter->format(logger, level, event);
     }
 }
 bool FileLogAppender::reopen() {
@@ -77,9 +106,9 @@ bool FileLogAppender::reopen() {
     return !!m_filestream;
 }
 
-void StdoutLogAppender::log(LogLevel::Level level, LogEvent::ptr event) {
+void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
-        std::cout << m_formatter->format(event);
+        std::cout << m_formatter->format(logger, level, event);
         
     }
 
@@ -100,15 +129,98 @@ namespace zhou { // LogFormatter
 LogFormatter::LogFormatter(const std::string& pattern) 
         : m_pattern(pattern) {
 }
-std::string LogFormatter::format(LogEvent::ptr event) {
+std::string LogFormatter::format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     std::stringstream ss;
     for (auto i : m_items) {
-        i->format(ss, event);
+        i->format(ss, logger, level, event);
     }
     return ss.str();
 }
-void LogFormatter::init() {
 
+// %xxx     %xxx{xxxx-xx-xx}    %%
+void LogFormatter::init() {
+    // str, format, type
+    std::vector<std::tuple<std::string, std::string, int>> vec;
+    std::string nstr;
+    for (size_t i = 0; i < m_pattern.size(); ++i) {
+        if (m_pattern[i] != '%') {
+            nstr.append(1, m_pattern[i]);
+            continue;
+        }
+
+        if (i + 1 < m_pattern.size()) {
+            if (m_pattern[i + 1] == '%') {
+                nstr.append(1, '%');
+                ++i;
+                continue;
+            }
+        }
+
+        int fmt_status = 0;
+        size_t n = i + 1;
+        std::string str;
+        std::string fmt;
+        size_t fmt_begin;
+        while(n < m_pattern.size()) {
+            if (isspace(m_pattern[n])) {
+                break;
+            }
+            if (fmt_status == 0) {
+                if (m_pattern[n] == '{') {
+                    str = m_pattern.substr(i+1, n-i-1);
+                    fmt_status = 1;     // 解析格式
+                    ++n;
+                    fmt_begin = n;
+                    continue;
+                }
+                
+            }
+            if (fmt_status == 1) {
+                if (m_pattern[n] == '}') {
+                    fmt = m_pattern.substr(fmt_begin, n - fmt_begin - 1);
+                    fmt_status = 2;
+                    break;
+                }
+            }
+        }
+
+        // % 后只有 str 没有指定 {} 中的格式
+        if (fmt_status == 0) {
+            if (!nstr.empty()) {
+                vec.push_back(std::make_tuple(nstr, "", 0));
+            }
+            str = m_pattern.substr(i+1, n-i-1);
+            vec.push_back(std::make_tuple(str, fmt, 1));
+            i = n;
+        } else if (fmt_status == 1) {
+            std::cout << "pattern parse error: " << m_pattern << " - " << m_pattern.substr(i) << std::endl;
+            vec.push_back(std::make_tuple("<<pattern_error>>", fmt, 1));
+        } else if (fmt_status == 2) {
+
+            vec.push_back(std::make_tuple(str, fmt, 1));
+            i = n;
+        }
+
+    }
+    if (!nstr.empty()) {
+        vec.push_back(std::make_tuple(nstr, "", 0));
+    }
+
+    static std::map<std::string, std::function<LogFormatter::LogFormatterItem::ptr(const std::string& fmt)>> s_format_items = {
+#define XX(str, C)    \
+        {#str, [](const std::string& fmt) { return LogFormatter::LogFormatterItem::ptr(new C ## LogFormatterItem(fmt)); } }
+
+
+        XX(m, Filename),
+        XX(l, Line),
+        XX(e, Elapse),
+        XX(t, ThreadId),
+        XX(f, FiberId),
+        // XX(Time)
+        XX(c, Content),
+#undef XX
+    };
 }
 
 } // !LogFormatter
+

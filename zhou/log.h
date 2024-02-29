@@ -14,6 +14,10 @@
 
 namespace zhou {
 
+class Logger;
+class LogFormatter;
+class LogAppender;
+
 
 // 日志事件
 // LogEvent 在每个输出位置都会被创建，并且会在日志输出结束后被析构
@@ -21,6 +25,15 @@ class LogEvent {
 public:
     typedef std::shared_ptr<LogEvent> ptr;
     LogEvent();
+
+    const char * getFilename() const { return m_file; }
+    int32_t getLine() const { return m_line; }
+
+    uint32_t getElapse() const { return m_elapse; }
+    uint32_t getThreadId() const { return m_threadId; }
+    uint32_t getFiberId() const { return m_fiberId; }
+    uint64_t getTime() const { return m_time; }
+    const std::string & getContent() const { return m_content; }
 private:
     const char * m_file = nullptr;  // 文件名
     int32_t m_line = 0;             // 文件行数
@@ -35,6 +48,7 @@ private:
 class LogLevel {
 public:
     enum Level {
+        UNKNOWN = 0,
         TRACE = 1,
         DEBUG = 2,
         INFO = 3,
@@ -42,6 +56,8 @@ public:
         ERROR = 5,
         FATAL = 6
     };
+
+    static const char * ToString(LogLevel::Level level);
 };
 
 
@@ -52,7 +68,7 @@ public:
     virtual ~LogAppender() {}
 
     // log 函数为纯虚函数，需要由子类实现该方法
-    virtual void log(LogLevel::Level level, LogEvent::ptr event) = 0;
+    virtual void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
     void setFormatter(LogFormatter::ptr formatter) { m_formatter = formatter; }
     LogFormatter::ptr getFormatter() const { return m_formatter; }
@@ -70,16 +86,17 @@ class LogFormatter {
 public:
     typedef std::shared_ptr<LogFormatter> ptr;
 
-    LogFormatter(const std::string& pattern);
-    std::string format(LogEvent::ptr event);
+    LogFormatter(const std::string& pattern) {}
+    std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event);
     void init();
-private:
+public:
     class LogFormatterItem {
     public:
         typedef std::shared_ptr<LogFormatterItem> ptr;
 
+        LogFormatterItem(const std::string& format = "") {}
         virtual ~LogFormatterItem() {}
-        virtual void format(std::ostream & os, LogEvent::ptr event) = 0;
+        virtual void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) = 0;
     };
 
 private:
@@ -91,7 +108,7 @@ private:
 
 
 // 日志输出器
-class Logger {
+class Logger : public std::enable_shared_from_this<Logger> {
 public:
     typedef std::shared_ptr<Logger> ptr;
 
@@ -110,8 +127,10 @@ public:
     void addAppender (LogAppender::ptr appender);
     void delAppender (LogAppender::ptr appender);
 
-    LogLevel::Level getLevel() { return m_level; }
+    LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level level) { m_level = level; }
+
+    const std::string& getName() const { return m_name; }
 private:
     std::string m_name;
     std::list<LogAppender::ptr> m_appenders;
@@ -123,7 +142,7 @@ private:
 class StdoutLogAppender : public LogAppender {
 public:
     typedef std::shared_ptr<StdoutLogAppender> ptr;
-    virtual void log(LogLevel::Level level, LogEvent::ptr event) override;
+    virtual void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
     
 private:
 
@@ -134,7 +153,7 @@ public:
     typedef std::shared_ptr<FileLogAppender> ptr;
 
     FileLogAppender(const std::string& filename);
-    virtual void log(LogLevel::Level level, LogEvent::ptr event) override;
+    virtual void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
 
     bool reopen();
 private:
@@ -145,6 +164,125 @@ private:
 
 
 }
+
+
+
+
+
+
+// item 子类实现
+namespace zhou {        // items class for LogFormatter::LogFormatterItem
+
+class LevelLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << LogLevel::ToString(level);
+    }
+};
+class LoggerNameLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << logger->getName();
+    }
+};
+class DateTimeLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    DateTimeLogFormatterItem(const std::string& format = "%Y:%m:%d %H:%M:%S") 
+            : m_format(format) {
+    }
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getTime();
+    }
+
+private:
+    std::string m_format;
+};
+class StringLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    StringLogFormatterItem(const std::string& str)
+            : LogFormatterItem(str), m_string(str) {
+        }
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << m_string;
+    }
+private:
+    std::string m_string;
+};
+class NewLineLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << std::endl;
+    }
+};
+
+
+#define XX(name)                                                                                                            \
+class name ## LogFormatterItem : public LogFormatter::LogFormatterItem {                                                    \
+public:                                                                                                                     \
+    name ## LogFormatterItem(const std::string& str) {}                                                                     \
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {               \
+        os << event->get ## name();                                                                                         \
+    }                                                                                                                       \
+};
+
+XX(Filename)
+XX(Line)
+XX(Elapse)
+XX(ThreadId)
+XX(FiberId)
+// XX(Time)
+XX(Content)
+
+#undef XX
+
+
+
+/*
+class MessageLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getContent();
+    }
+};
+class ElapseLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getElapse();
+    }
+};
+class ThreadIdLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getThreadId();
+    }
+};
+class FiberIdLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getFiberId();
+    }
+};
+class TimeLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getTime();
+    }
+};
+class MessageLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getContent();
+    }
+};
+class MessageLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getContent();
+    }
+};
+*/
+
+}   // !items class for LogFormatter::LogFormatterItem
 
 
 #endif // !__ZHOU_LOG_H__
