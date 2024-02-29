@@ -97,4 +97,18 @@ void StdoutLogAppender::log(LogLevel::Level level, LogEvent::ptr event) {
 
 namespace zhou { // LogFormatter
 
+LogFormatter::LogFormatter(const std::string& pattern) 
+        : m_pattern(pattern) {
+}
+std::string LogFormatter::format(LogEvent::ptr event) {
+    std::stringstream ss;
+    for (auto i : m_items) {
+        i->format(ss, event);
+    }
+    return ss.str();
+}
+void LogFormatter::init() {
+
+}
+
 } // !LogFormatter

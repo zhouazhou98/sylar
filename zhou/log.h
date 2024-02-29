@@ -10,6 +10,7 @@
 #include <list>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 namespace zhou {
 
@@ -61,12 +62,29 @@ protected:
     LogFormatter::ptr m_formatter;
 };
 
+
+
+
 // 日志格式
 class LogFormatter {
 public:
     typedef std::shared_ptr<LogFormatter> ptr;
+
+    LogFormatter(const std::string& pattern);
     std::string format(LogEvent::ptr event);
+    void init();
 private:
+    class LogFormatterItem {
+    public:
+        typedef std::shared_ptr<LogFormatterItem> ptr;
+
+        virtual ~LogFormatterItem() {}
+        virtual void format(std::ostream & os, LogEvent::ptr event) = 0;
+    };
+
+private:
+    std::string m_pattern;
+    std::vector<LogFormatterItem::ptr> m_items;
 
 };
 
