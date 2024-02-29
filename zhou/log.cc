@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-namespace zhou {
-// Logger
+
+namespace zhou { // Logger
+
 
 Logger::Logger(const std::string & name = "root") 
         : m_name(name) {
@@ -49,12 +50,17 @@ void Logger::delAppender (LogAppender::ptr appender) {
             m_appenders.erase(iter);
         }
 }
-// !Logger
+
+} // !Logger
 
 
 
+// -------------------------------------------------------
 
-// LogAppender
+
+
+namespace zhou { // LogAppender
+
 FileLogAppender::FileLogAppender(const std::string& filename) 
         : m_filename(filename) {
 }
@@ -78,7 +84,17 @@ void StdoutLogAppender::log(LogLevel::Level level, LogEvent::ptr event) {
     }
 
 }
-// !LogAppender
 
 
-}
+
+} // !LogAppender
+
+
+
+// -------------------------------------------------------
+
+
+
+namespace zhou { // LogFormatter
+
+} // !LogFormatter
