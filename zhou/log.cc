@@ -210,16 +210,38 @@ void LogFormatter::init() {
 #define XX(str, C)    \
         {#str, [](const std::string& fmt) { return LogFormatter::LogFormatterItem::ptr(new C ## LogFormatterItem(fmt)); } }
 
-
-        XX(m, Filename),
-        XX(l, Line),
-        XX(e, Elapse),
-        XX(t, ThreadId),
-        XX(f, FiberId),
-        // XX(Time)
-        XX(c, Content),
+        XX(m, Content),           //m: 消息
+        XX(p, Level),             //p: 日志级别
+        XX(r, Elapse),            //r: 累计毫秒数
+        XX(c, LoggerName),        //c: 日志名称
+        XX(t, ThreadId),          //t: 线程id
+        XX(n, NewLine),           //n: 换行
+        XX(d, DateTime),          //d: 时间
+        XX(f, Filename),          //f: 文件名
+        XX(l, Line),              //l: 行号
+        XX(T, Tab),               //T: Tab
+        XX(F, FiberId),           //F: 协程id
+        XX(N, ThreadName),        //N: 线程名称
 #undef XX
     };
+
+    for (auto& i : vec) {
+        if (std::get<2>(i) == 0) {
+            m_items.push_back(LogFormatterItem::ptr(
+                                    new StringLogFormatterItem(std::get<0>(i))
+                            ) );
+        } else {
+            auto iter = s_format_items.find(std::get<0>(i));
+            if (iter == s_format_items.end()) {
+                m_items.push_back(LogFormatterItem::ptr(
+                                    new StringLogFormatterItem("<<format_error: %" + std::get<0>(i) + ">>")
+                            ) );
+                m_error = true;
+            } else {
+                m_items.push_back(iter->second(std::get<1>(i)));
+            }
+        }
+    }
 }
 
 } // !LogFormatter

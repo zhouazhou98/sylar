@@ -102,6 +102,7 @@ public:
 private:
     std::string m_pattern;
     std::vector<LogFormatterItem::ptr> m_items;
+    bool m_error;
 
 };
 
@@ -175,12 +176,14 @@ namespace zhou {        // items class for LogFormatter::LogFormatterItem
 
 class LevelLogFormatterItem : public LogFormatter::LogFormatterItem {
 public:
+    LevelLogFormatterItem(const std::string& str) {}   
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
         os << LogLevel::ToString(level);
     }
 };
 class LoggerNameLogFormatterItem : public LogFormatter::LogFormatterItem {
 public:
+    LoggerNameLogFormatterItem(const std::string& str) {}   
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
         os << logger->getName();
     }
@@ -210,8 +213,16 @@ private:
 };
 class NewLineLogFormatterItem : public LogFormatter::LogFormatterItem {
 public:
+    NewLineLogFormatterItem(const std::string& str) {}   
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
         os << std::endl;
+    }
+};
+class TabLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    TabLogFormatterItem(const std::string& str) {}   
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << "\t";
     }
 };
 
