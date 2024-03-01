@@ -221,7 +221,7 @@ void LogFormatter::init() {
         XX(l, Line),              //l: 行号
         XX(T, Tab),               //T: Tab
         XX(F, FiberId),           //F: 协程id
-        XX(N, ThreadName),        //N: 线程名称
+        //XX(N, ThreadName),        //N: 线程名称
 #undef XX
     };
 
@@ -241,6 +241,7 @@ void LogFormatter::init() {
                 m_items.push_back(iter->second(std::get<1>(i)));
             }
         }
+        std::cout << std::get<0>(i) << " - " << std::get<1>(i) << " - " << std::get<2>(i) << std::endl;
     }
 }
 
