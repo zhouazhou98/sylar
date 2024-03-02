@@ -16,6 +16,13 @@ set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -g -std=c++11 -Wall -Wno-depre
 # --------------------------------------------------------
 
 
+# 添加编译时 include 路径
+include_directories(.)
+
+
+# --------------------------------------------------------
+
+
 # 将源码文件设置到变量 LIB_SRC
 set(LIB_SRC
     zhou/log.cc
@@ -55,5 +62,5 @@ target_link_libraries(test zhou)
 # 可执行（测试）文件生成路径
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 # 库文件生成路径
-set(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
