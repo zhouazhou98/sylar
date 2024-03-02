@@ -25,7 +25,7 @@ include_directories(.)
 
 # 将源码文件设置到变量 LIB_SRC
 set(LIB_SRC
-    zhou/log.cc
+    zhou/log/log.cc
     )
 
 
