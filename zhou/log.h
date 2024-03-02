@@ -61,6 +61,32 @@ public:
 };
 
 
+// 日志格式
+class LogFormatter {
+public:
+    typedef std::shared_ptr<LogFormatter> ptr;
+
+    LogFormatter(const std::string& pattern);
+    std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
+    void init();
+public:
+    class LogFormatterItem {
+    public:
+        typedef std::shared_ptr<LogFormatterItem> ptr;
+
+        // LogFormatterItem(const std::string& format = "") {}
+        virtual ~LogFormatterItem() {}
+        virtual void format(std::ostream & os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
+    };
+
+private:
+    std::string m_pattern;
+    std::vector<LogFormatterItem::ptr> m_items;
+    bool m_error;
+
+};
+
+
 // 日志输出地
 class LogAppender {
 public:
@@ -68,7 +94,7 @@ public:
     virtual ~LogAppender() {}
 
     // log 函数为纯虚函数，需要由子类实现该方法
-    virtual void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) = 0;
+    virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
     void setFormatter(LogFormatter::ptr formatter) { m_formatter = formatter; }
     LogFormatter::ptr getFormatter() const { return m_formatter; }
@@ -78,33 +104,6 @@ protected:
     LogFormatter::ptr m_formatter;
 };
 
-
-
-
-// 日志格式
-class LogFormatter {
-public:
-    typedef std::shared_ptr<LogFormatter> ptr;
-
-    LogFormatter(const std::string& pattern) {}
-    std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event);
-    void init();
-public:
-    class LogFormatterItem {
-    public:
-        typedef std::shared_ptr<LogFormatterItem> ptr;
-
-        LogFormatterItem(const std::string& format = "") {}
-        virtual ~LogFormatterItem() {}
-        virtual void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) = 0;
-    };
-
-private:
-    std::string m_pattern;
-    std::vector<LogFormatterItem::ptr> m_items;
-    bool m_error;
-
-};
 
 
 
@@ -203,7 +202,7 @@ private:
 class StringLogFormatterItem : public LogFormatter::LogFormatterItem {
 public:
     StringLogFormatterItem(const std::string& str)
-            : LogFormatterItem(str), m_string(str) {
+            : /* LogFormatterItem(str), */ m_string(str) {
         }
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
         os << m_string;

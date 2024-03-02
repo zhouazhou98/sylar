@@ -1,4 +1,4 @@
-#include "zhou/log.h"
+#include "log.h"
 
 #include <iostream>
 #include <map>
@@ -35,7 +35,7 @@ const char * LogLevel::ToString(LogLevel::Level level) {
 namespace zhou { // Logger
 
 
-Logger::Logger(const std::string & name = "root") 
+Logger::Logger(const std::string & name)
         : m_name(name) {
 }
 
