@@ -24,9 +24,13 @@ class LogAppender;
 class LogEvent {
 public:
     typedef std::shared_ptr<LogEvent> ptr;
-    LogEvent();
+    //LogEvent();
+    LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
+                uint32_t theadId, uint32_t fiberId, uint64_t time,
+                const std::string& content
+    );
 
-    const char * getFilename() const { return m_file; }
+    const char * getFilename() const { return m_filename; }
     int32_t getLine() const { return m_line; }
 
     uint32_t getElapse() const { return m_elapse; }
@@ -35,7 +39,7 @@ public:
     uint64_t getTime() const { return m_time; }
     const std::string & getContent() const { return m_content; }
 private:
-    const char * m_file = nullptr;  // 文件名
+    const char * m_filename = nullptr;  // 文件名
     int32_t m_line = 0;             // 文件行数
     uint32_t m_elapse = 0;          // 程序启动到现在的毫秒数
     uint32_t m_threadId = 0;        // 执行该 event 的线程 ID
