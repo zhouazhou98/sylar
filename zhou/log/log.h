@@ -135,6 +135,7 @@ private:
     std::string m_name;
     std::list<LogAppender::ptr> m_appenders;
     LogLevel::Level m_level;
+    LogFormatter::ptr m_formatter;
 
 };
 

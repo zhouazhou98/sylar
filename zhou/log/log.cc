@@ -37,6 +37,7 @@ namespace zhou { // Logger
 
 Logger::Logger(const std::string & name)
         : m_name(name) {
+    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
 }
 
 void Logger::log (LogLevel::Level level, LogEvent::ptr event) {
@@ -71,6 +72,9 @@ void Logger::fatal (LogEvent::ptr event) {
 }
 
 void Logger::addAppender (LogAppender::ptr appender) {
+    if (!appender->getFormatter()) {
+        appender->setFormatter(m_formatter);
+    }
     m_appenders.push_back(appender);
 }
 void Logger::delAppender (LogAppender::ptr appender) {
