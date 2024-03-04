@@ -146,7 +146,7 @@ std::string LogFormatter::format(Logger::ptr logger, LogLevel::Level level, LogE
 
 // %xxx     %xxx{xxxx-xx-xx}    %%
 void LogFormatter::init() {
-
+    
     //str, format, type
     std::vector<std::tuple<std::string, std::string, int> > vec;
     std::string nstr;
@@ -263,12 +263,14 @@ void LogFormatter::init() {
                     break;
                 }
             }
+            ++n;
         }
 
         // % 后只有 str 没有指定 {} 中的格式
         if (fmt_status == 0) {
             if (!nstr.empty()) {
                 vec.push_back(std::make_tuple(nstr, "", 0));
+                nstr.clear();
             }
             str = m_pattern.substr(i+1, n-i-1);
             vec.push_back(std::make_tuple(str, fmt, 1));
@@ -277,16 +279,23 @@ void LogFormatter::init() {
             std::cout << "pattern parse error: " << m_pattern << " - " << m_pattern.substr(i) << std::endl;
             vec.push_back(std::make_tuple("<<pattern_error>>", fmt, 1));
         } else if (fmt_status == 2) {
+            if (!nstr.empty()) {
+                vec.push_back(std::make_tuple(nstr, "", 0));
+                nstr.clear();
+            }
 
             vec.push_back(std::make_tuple(str, fmt, 1));
             i = n;
         }
 
     }
+
     if (!nstr.empty()) {
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
+
 */
+
     static std::map<std::string, std::function<LogFormatter::LogFormatterItem::ptr(const std::string& fmt)>> s_format_items = {
 #define XX(str, C)    \
         {#str, [](const std::string& fmt) { return LogFormatter::LogFormatterItem::ptr(new C ## LogFormatterItem(fmt)); } }
@@ -322,7 +331,7 @@ void LogFormatter::init() {
                 m_items.push_back(iter->second(std::get<1>(i)));
             }
         }
-        // std::cout << std::get<0>(i) << " - " << std::get<1>(i) << " - " << std::get<2>(i) << std::endl;
+        std::cout << std::get<0>(i) << " - " << std::get<1>(i) << " - " << std::get<2>(i) << std::endl;
     }
 }
 
