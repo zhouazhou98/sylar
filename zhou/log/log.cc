@@ -146,7 +146,7 @@ std::string LogFormatter::format(Logger::ptr logger, LogLevel::Level level, LogE
 
 // %xxx     %xxx{xxxx-xx-xx}    %%
 void LogFormatter::init() {
-/*
+
     //str, format, type
     std::vector<std::tuple<std::string, std::string, int> > vec;
     std::string nstr;
@@ -219,7 +219,7 @@ void LogFormatter::init() {
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
 
-*/
+/*
     // str, format, type
     std::vector<std::tuple<std::string, std::string, int>> vec;
     std::string nstr;
@@ -286,7 +286,7 @@ void LogFormatter::init() {
     if (!nstr.empty()) {
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
-
+*/
     static std::map<std::string, std::function<LogFormatter::LogFormatterItem::ptr(const std::string& fmt)>> s_format_items = {
 #define XX(str, C)    \
         {#str, [](const std::string& fmt) { return LogFormatter::LogFormatterItem::ptr(new C ## LogFormatterItem(fmt)); } }
@@ -333,10 +333,9 @@ void LogFormatter::init() {
 namespace zhou {
 
     LogEvent::LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
-                uint32_t threadId, uint32_t fiberId, uint64_t time,
-                const std::string& content
+                uint32_t threadId, uint32_t fiberId, uint64_t time
     ) : m_filename(filename), m_line(line), m_elapse(elapse), m_threadId(threadId),
-    m_fiberId(fiberId), m_time(time), m_content(content) {
+    m_fiberId(fiberId), m_time(time) {
     }
 
 }

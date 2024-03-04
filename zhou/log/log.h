@@ -26,8 +26,7 @@ public:
     typedef std::shared_ptr<LogEvent> ptr;
     //LogEvent();
     LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
-                uint32_t theadId, uint32_t fiberId, uint64_t time,
-                const std::string& content
+                uint32_t theadId, uint32_t fiberId, uint64_t time
     );
 
     const char * getFilename() const { return m_filename; }
@@ -37,7 +36,8 @@ public:
     uint32_t getThreadId() const { return m_threadId; }
     uint32_t getFiberId() const { return m_fiberId; }
     uint64_t getTime() const { return m_time; }
-    const std::string & getContent() const { return m_content; }
+    const std::string getContent() const { return m_ss.str(); }
+    std::stringstream & getSS() { return m_ss; }
 private:
     const char * m_filename = nullptr;  // 文件名
     int32_t m_line = 0;             // 文件行数
@@ -45,7 +45,8 @@ private:
     uint32_t m_threadId = 0;        // 执行该 event 的线程 ID
     uint32_t m_fiberId = 0;         // 执行该 event 的协程 ID
     uint64_t m_time = 0;                // 时间戳
-    std::string m_content;          // 需要输出的日志内容
+    // std::string m_content;          // 需要输出的日志内容
+    std::stringstream m_ss;           // 需要输出的日志内容
 };
 
 
