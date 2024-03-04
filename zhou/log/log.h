@@ -202,7 +202,12 @@ public:
         }
     }
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
-        os << event->getTime();
+        struct tm tm;
+        time_t time = event->getTime();
+        localtime_r(&time, &tm);
+        char buf[32];
+        strftime(buf, sizeof(buf), m_format.c_str(), &tm);
+        os << buf; // event->getTime();
     }
 
 private:
