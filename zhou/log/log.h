@@ -105,7 +105,7 @@ public:
     LogFormatter::ptr getFormatter() const { return m_formatter; }
 
 protected:
-    LogLevel::Level m_level;
+    LogLevel::Level m_level = LogLevel::DEBUG;
     LogFormatter::ptr m_formatter;
 };
 
@@ -195,8 +195,11 @@ public:
 };
 class DateTimeLogFormatterItem : public LogFormatter::LogFormatterItem {
 public:
-    DateTimeLogFormatterItem(const std::string& format = "%Y:%m:%d %H:%M:%S") 
+    DateTimeLogFormatterItem(const std::string& format = "%Y-%m-%d %H:%M:%S") 
             : m_format(format) {
+        if (m_format.empty()) {
+            m_format = "%Y-%m-%d %H:%M:%S";
+        }
     }
     void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
         os << event->getTime();
