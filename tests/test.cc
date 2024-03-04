@@ -1,5 +1,22 @@
 #include <iostream>
 #include "zhou/log/log.h"
+
+#define ZHOU_LOG(logger, level)    \
+    if (logger->getLevel() <= level)    \
+        zhou::LogEventWrap(   logger, \
+                        level,  \
+                        zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, 0, 0, time(0)) )   \
+            ).getSS()
+
+#define ZHOU_TRACE(logger)  ZHOU_LOG(logger, zhou::LogLevel::TRACE)
+#define ZHOU_DEBUG(logger)  ZHOU_LOG(logger, zhou::LogLevel::DEBUG)
+#define ZHOU_INFO(logger)   ZHOU_LOG(logger, zhou::LogLevel::INFO)
+#define ZHOU_WARN(logger)   ZHOU_LOG(logger, zhou::LogLevel::WARN)
+#define ZHOU_ERROR(logger)  ZHOU_LOG(logger, zhou::LogLevel::ERROR)
+#define ZHOU_FATAL(logger)  ZHOU_LOG(logger, zhou::LogLevel::FATAL)
+
+
+
 int main() {
     zhou::Logger::ptr logger(new zhou::Logger);
     logger->addAppender(zhou::LogAppender::ptr(new zhou::StdoutLogAppender));
@@ -10,6 +27,9 @@ int main() {
     // std::cout << event->getContent() << std::endl;
     logger->log(zhou::LogLevel::INFO, event);
 
-    //std::cout << "hello world!\n";
+    ZHOU_LOG(logger, zhou::LogLevel::INFO) << "ok";
+    ZHOU_ERROR(logger) << "ok";
+
+    std::cout << "hello world!\n";
     return 0;
 }

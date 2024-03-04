@@ -301,4 +301,28 @@ public:
 }   // !items class for LogFormatter::LogFormatterItem
 
 
+
+
+
+namespace zhou{
+    class LogEventWrap {
+    public:
+        LogEventWrap(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) : m_logger(logger), m_level(level), m_event(event) {
+            // m_event = LogEvent::ptr(new LogEvent)
+        }
+        ~LogEventWrap () {
+            m_logger->log(m_level, m_event);
+        }
+
+        std::stringstream & getSS() { return m_event->getSS(); }
+    private:
+        Logger::ptr m_logger;
+        LogLevel::Level m_level;
+        LogEvent::ptr m_event;
+    };
+}
+
+
+
+
 #endif // !__ZHOU_LOG_H__
