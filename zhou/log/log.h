@@ -10,6 +10,7 @@
 #include <list>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <vector>
 
 namespace zhou {
@@ -26,23 +27,23 @@ public:
     typedef std::shared_ptr<LogEvent> ptr;
     //LogEvent();
     LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
-                uint32_t theadId, uint32_t fiberId, uint64_t time
+                pthread_t theadId, uint32_t fiberId, uint64_t time
     );
 
     const char * getFilename() const { return m_filename; }
     int32_t getLine() const { return m_line; }
 
     uint32_t getElapse() const { return m_elapse; }
-    uint32_t getThreadId() const { return m_threadId; }
+    pthread_t getThreadId() const { return m_threadId; }
     uint32_t getFiberId() const { return m_fiberId; }
     uint64_t getTime() const { return m_time; }
     const std::string getContent() const { return m_ss.str(); }
     std::stringstream & getSS() { return m_ss; }
 private:
     const char * m_filename = nullptr;  // 文件名
-    int32_t m_line = 0;             // 文件行数
+    int32_t  m_line = 0;             // 文件行数
     uint32_t m_elapse = 0;          // 程序启动到现在的毫秒数
-    uint32_t m_threadId = 0;        // 执行该 event 的线程 ID
+    pthread_t m_threadId = 0;        // 执行该 event 的线程 ID
     uint32_t m_fiberId = 0;         // 执行该 event 的协程 ID
     uint64_t m_time = 0;                // 时间戳
     // std::string m_content;          // 需要输出的日志内容
@@ -252,7 +253,7 @@ public:                                                                         
 XX(Filename)
 XX(Line)
 XX(Elapse)
-XX(ThreadId)
+// XX(ThreadId)
 XX(FiberId)
 // XX(Time)
 XX(Content)
@@ -260,6 +261,13 @@ XX(Content)
 #undef XX
 
 
+class ThreadIdLogFormatterItem : public LogFormatter::LogFormatterItem {
+public:
+    ThreadIdLogFormatterItem(const std::string& str) {}
+    void format(std::ostream & os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
+        os << event->getThreadId();
+    }
+};
 
 /*
 class MessageLogFormatterItem : public LogFormatter::LogFormatterItem {

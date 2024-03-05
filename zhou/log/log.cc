@@ -38,8 +38,8 @@ namespace zhou { // Logger
 Logger::Logger(const std::string & name)
         : m_name(name),
         m_level(LogLevel::DEBUG) {
-    // m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
-    m_formatter.reset(new LogFormatter("%d [%p] <%f:%l> %m%n"));
+    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
+    // m_formatter.reset(new LogFormatter("%d [%p] <%f:%l> %m%n"));
 }
 
 void Logger::log (LogLevel::Level level, LogEvent::ptr event) {
@@ -342,7 +342,7 @@ void LogFormatter::init() {
 namespace zhou {    // LogEvent
 
     LogEvent::LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
-                uint32_t threadId, uint32_t fiberId, uint64_t time
+                pthread_t threadId, uint32_t fiberId, uint64_t time
     ) : m_filename(filename), m_line(line), m_elapse(elapse), m_threadId(threadId),
     m_fiberId(fiberId), m_time(time) {
     }
