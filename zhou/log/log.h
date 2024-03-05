@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <stdarg.h>
 
 namespace zhou {
 
@@ -39,6 +40,25 @@ public:
     uint64_t getTime() const { return m_time; }
     const std::string getContent() const { return m_ss.str(); }
     std::stringstream & getSS() { return m_ss; }
+
+    void format(const char * fmt, ...) {
+        va_list al;
+        va_start(al, fmt);
+        format(fmt, al);
+        va_end(al);
+    }
+
+    void format(const char* fmt) {
+        m_ss << std::string(fmt);
+    }
+    void format(const char* fmt, va_list al) {
+        char* buf = nullptr;
+        int len = vasprintf(&buf, fmt, al);
+        if(len != -1) {
+            m_ss << std::string(buf, len);
+            free(buf);
+        }
+    }
 private:
     const char * m_filename = nullptr;  // 文件名
     int32_t  m_line = 0;             // 文件行数
@@ -331,6 +351,12 @@ namespace zhou{
         }
 
         std::stringstream & getSS() { return m_event->getSS(); }
+        void format(const char * fmt, ...) { 
+            va_list al;
+            va_start(al, fmt);
+            m_event->format(fmt, al);
+            va_end(al);
+        }
     private:
         Logger::ptr m_logger;
         LogLevel::Level m_level;
