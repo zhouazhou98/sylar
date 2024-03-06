@@ -25,13 +25,13 @@
         zhou::LogEventWrap(   logger, \
                         level,  \
                         zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, syscall(SYS_gettid), zhou::GetFiberId(), time(0)) )   \
-            ).format(fmt, __VA_ARGS__)
+            ).format(fmt, ## __VA_ARGS__)
 
-#define ZHOU_TRACE_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::TRACE, fmt, __VA_ARGS__)
-#define ZHOU_DEBUG_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::DEBUG, fmt, __VA_ARGS__)
-#define ZHOU_INFO_FMT(logger, fmt, ...)   ZHOU_LOG_FMT(logger, zhou::LogLevel::INFO, fmt, __VA_ARGS__)
-#define ZHOU_WARN_FMT(logger, fmt, ...)   ZHOU_LOG_FMT(logger, zhou::LogLevel::WARN, fmt, __VA_ARGS__)
-#define ZHOU_ERROR_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::ERROR, fmt, __VA_ARGS__)
-#define ZHOU_FATAL_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::FATAL, fmt, __VA_ARGS__)
+#define ZHOU_TRACE_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::TRACE, fmt,## __VA_ARGS__)
+#define ZHOU_DEBUG_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::DEBUG, fmt,## __VA_ARGS__)
+#define ZHOU_INFO_FMT(logger, fmt, ...)   ZHOU_LOG_FMT(logger, zhou::LogLevel::INFO, fmt, ## __VA_ARGS__)
+#define ZHOU_WARN_FMT(logger, fmt, ...)   ZHOU_LOG_FMT(logger, zhou::LogLevel::WARN, fmt, ## __VA_ARGS__)
+#define ZHOU_ERROR_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::ERROR, fmt,## __VA_ARGS__)
+#define ZHOU_FATAL_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::FATAL, fmt,## __VA_ARGS__)
 
 #endif  // !__ZHOU_UTIL_MACRO_H__

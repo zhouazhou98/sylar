@@ -19,6 +19,6 @@ int main() {
     ZHOU_LOG_FMT(logger, zhou::LogLevel::INFO, "hello%s", "world");
     ZHOU_DEBUG_FMT(logger, "hello%s", "world");
     ZHOU_INFO_FMT(logger, "hello%s", "world");
-    ZHOU_TRACE_FMT(logger, "hello%s", "world");
+    ZHOU_INFO_FMT(logger, "hello");
     return 0;
 }
