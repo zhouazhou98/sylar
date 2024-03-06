@@ -2,7 +2,7 @@
 #include "zhou/log/log.h"
 #include "zhou/utils/util.h"
 #include "zhou/utils/macro.h"
-
+#include "zhou/log/log_manager.h"
 
 
 int main() {
@@ -39,6 +39,10 @@ int main() {
     for (int i = 0; i < 1000000; i++) {
         ZHOU_ERROR(logger) << "test\t" << i << "\t";
     }
+
+
+    auto l = zhou::SingleLoggerManager::GetInstance()->getLogger("xx");
+    ZHOU_ERROR(l) << "Singleton LoggerManager";
 
     return 0;
 }
