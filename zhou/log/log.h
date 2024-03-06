@@ -124,6 +124,8 @@ public:
 
     void setFormatter(LogFormatter::ptr formatter) { m_formatter = formatter; }
     LogFormatter::ptr getFormatter() const { return m_formatter; }
+    LogLevel::Level getLevel() const { return m_level; }
+    void setLevel(LogLevel::Level level) { m_level = level; }
 
 protected:
     LogLevel::Level m_level = LogLevel::DEBUG;

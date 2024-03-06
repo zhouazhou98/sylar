@@ -98,6 +98,7 @@ namespace zhou { // LogAppender
 
 FileLogAppender::FileLogAppender(const std::string& filename) 
         : m_filename(filename) {
+            reopen();
 }
 void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
@@ -108,7 +109,7 @@ bool FileLogAppender::reopen() {
     if (m_filestream) {
         m_filestream.close();
     }
-    m_filestream.open(m_filename);
+    m_filestream.open(m_filename, std::ios_base::app);
     return !!m_filestream;
 }
 
