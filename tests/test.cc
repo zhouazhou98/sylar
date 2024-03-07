@@ -1,8 +1,5 @@
 #include <iostream>
-#include "zhou/log/log.h"
-#include "zhou/utils/util.h"
-#include "zhou/utils/macro.h"
-#include "zhou/log/log_manager.h"
+#include "zhou/zhou.h"
 
 
 int main() {

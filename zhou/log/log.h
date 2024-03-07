@@ -137,6 +137,7 @@ protected:
 
 // 日志输出器
 class Logger : public std::enable_shared_from_this<Logger> {
+    // friend class LogManager;
 public:
     typedef std::shared_ptr<Logger> ptr;
 
@@ -159,8 +160,11 @@ public:
     void setLevel(LogLevel::Level level) { m_level = level; }
 
     const std::string& getName() const { return m_name; }
+
+    void setRoot(ptr logger) { m_root = logger; }
 private:
     std::string m_name;
+    ptr m_root;
     std::list<LogAppender::ptr> m_appenders;
     LogLevel::Level m_level;
     LogFormatter::ptr m_formatter;

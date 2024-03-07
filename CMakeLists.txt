@@ -10,7 +10,7 @@ project(zhou)
 # CMake 过程中输出 Makefile 执行过程中详细的命令
 set(CMAKE_VERBOSE_MAKEFILE ON)
 # 自定义 Make 编译参数
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 
 
 # --------------------------------------------------------
@@ -27,6 +27,7 @@ include_directories(.)
 set(LIB_SRC
     zhou/log/log.cc
     zhou/utils/util.cc
+    zhou/thread/thread.cc
     )
 
 
@@ -50,12 +51,20 @@ add_library(zhou SHARED ${LIB_SRC})
 # --------------------------------------------------------
 
 
-# 生成测试文件 test
+# 生成测试文件 test                    
 add_executable(test tests/test.cc)
-# 测试文件 test 依赖于我们生成的共享库 zhou.so
-add_dependencies(test zhou)
-# 其链接时需要链接到 zhou.so 共享库
-target_link_libraries(test zhou)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(test zhou)      
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(test zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_thread)
+add_executable(${TEST_EXEC} tests/test_thread.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
 
 
 # --------------------------------------------------------
