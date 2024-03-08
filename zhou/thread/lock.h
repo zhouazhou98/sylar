@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 
-namespace {     // ScopedLockImpl
+namespace zhou {     // ScopedLockImpl
 
 template <class T>
 class ScopedLockImpl {
@@ -36,7 +36,6 @@ private:
 
 }       // !ScopedLockImpl
 
-
 namespace zhou {    // Mutex
 class Mutex {
 public:
@@ -46,36 +45,5 @@ private:
 };
 
 }   // ! Mutex
-
-
-
-namespace zhou {    // RWMutex
-class RWMutex {
-public:
-    RWMutex() {
-        pthread_rwlock_init(&m_lock, nullptr);
-    }
-
-    ~RWMutex() {
-        pthread_rwlock_destroy(&m_lock);
-    }
-
-    void rdlock() {
-        pthread_rwlock_rdlock(&m_lock);
-    }
-    void wrlock() {
-        pthread_rwlock_wrlock(&m_lock);
-    }
-
-    void unlock() {
-        pthread_rwlock_unlock(&m_lock);
-
-    }
-private:
-    pthread_rwlock_t m_lock;
-
-};
-
-}   // ! RWMutex
 
 #endif      // !__ZHOU_LOCK_H__

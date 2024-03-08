@@ -11,5 +11,6 @@
 #include "thread/thread.h"      // 线程
 #include "thread/semaphore.h"   // 同步： 信号量
 #include "thread/lock.h"        // 互斥： 锁
+#include "thread/rwlock.h"      // 互斥： 读写锁
 
 #endif // !__ZHOU_H__
