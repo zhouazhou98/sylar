@@ -3,6 +3,7 @@
 
 #include "zhou/zhou.h"
 #include "semaphore.h"
+#include "lock.h"
 
 #include <thread>
 #include <functional>

@@ -28,7 +28,8 @@ set(LIB_SRC
     zhou/log/log.cc
     zhou/utils/util.cc
     zhou/thread/thread.cc
-    zhou/thread/semaphore.cc
+    zhou/thread/semaphore.cc    # 同步
+    # zhou/thread/lock.cc         # 互斥
     )
 
 
