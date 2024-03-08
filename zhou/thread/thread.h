@@ -2,6 +2,7 @@
 #define __ZHOU_THREAD_H__
 
 #include "zhou/zhou.h"
+#include "semaphore.h"
 
 #include <thread>
 #include <functional>
@@ -40,6 +41,8 @@ private:
     pthread_t m_thread = 0;
     std::function<void()> m_callback;
     std::string m_name;
+
+    Semaphore m_semaphore;
 };
 
 

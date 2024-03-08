@@ -31,6 +31,7 @@ void * Thread::run(void * arg) {
     std::function<void()> callback;
     callback.swap(thread->m_callback);
 
+    thread->m_semaphore.notify();
     callback();
     return 0;
 }
@@ -66,5 +67,6 @@ void Thread::join() {
         // TODO: 为什么这里 join 等待 m_thread 线程运行结束后需要将 m_thread 置空
         m_thread = 0;
     }
+    m_semaphore.wait();
 }
 }

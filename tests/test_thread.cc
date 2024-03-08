@@ -12,7 +12,7 @@ void fun1() {
     // ps aux | grep test_thread : 命令可以查看到 test_thread 测试程序进程号
     // top -H -p {测试程序进程号}  ： 命令可以查看到由 test_thread 测试程序产生的线程
     // 注意： 这里的 sleep 就是为了线程不退出，便于用命令行查看
-    sleep(60);
+    // sleep(60);
     
     return ;
 }
@@ -33,10 +33,14 @@ int main() {
         zhou::Thread::ptr thr(
                         new zhou::Thread(&fun1, "thread_" + std::to_string(i))
                 );
+        ZHOU_TRACE(g_logger) << "thread push_back begin";
         threads.push_back(thr);
+        ZHOU_INFO(g_logger) << "thread push_back end";
     }
     for (int i = 0; i < 5; i++) {
+        ZHOU_TRACE(g_logger) << "thread join begin";
         threads[i]->join();
+        ZHOU_INFO(g_logger) << "thread join end";
     }
     ZHOU_INFO(g_logger) << "thread test end";
     return 0;    
