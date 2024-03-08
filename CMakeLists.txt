@@ -28,6 +28,7 @@ set(LIB_SRC
     zhou/log/log.cc
     zhou/utils/util.cc
     zhou/thread/thread.cc
+    zhou/thread/semaphore.cc
     )
 
 

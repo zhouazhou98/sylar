@@ -9,5 +9,6 @@
 #include "utils/singleton.h"
 
 #include "thread/thread.h"
+#include "thread/semaphore.h"
 
 #endif // !__ZHOU_H__
