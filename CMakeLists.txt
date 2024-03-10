@@ -10,7 +10,7 @@ project(zhou)
 # CMake 过程中输出 Makefile 执行过程中详细的命令
 set(CMAKE_VERBOSE_MAKEFILE ON)
 # 自定义 Make 编译参数
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -ggdb -pg -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 
 
 # --------------------------------------------------------
