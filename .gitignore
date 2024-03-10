@@ -3,5 +3,5 @@ build/
 bin/
 lib/
 .git.bak/
-log/
+log/log.txt
 *.out
