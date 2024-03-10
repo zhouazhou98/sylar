@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <stdarg.h>
+#include "zhou/thread/lock.h"
 
 namespace zhou {
 
@@ -117,19 +118,22 @@ private:
 class LogAppender {
 public:
     typedef std::shared_ptr<LogAppender> ptr;
+    typedef Mutex MutexType;
     virtual ~LogAppender() {}
 
     // log 函数为纯虚函数，需要由子类实现该方法
     virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
-    void setFormatter(LogFormatter::ptr formatter) { m_formatter = formatter; }
-    LogFormatter::ptr getFormatter() const { return m_formatter; }
+    void setFormatter(LogFormatter::ptr);
+    void setFormatter(const std::string & val);
+    LogFormatter::ptr getFormatter();
     LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level level) { m_level = level; }
 
 protected:
     LogLevel::Level m_level = LogLevel::DEBUG;
     LogFormatter::ptr m_formatter;
+    MutexType m_mutex;
 };
 
 
@@ -140,6 +144,7 @@ class Logger : public std::enable_shared_from_this<Logger> {
     // friend class LogManager;
 public:
     typedef std::shared_ptr<Logger> ptr;
+    typedef Mutex MutexType;
 
 
     // 这里使用 & 传入 std::string 引用，即在传参数时不需要传入整个字符串
@@ -159,6 +164,10 @@ public:
     LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level level) { m_level = level; }
 
+    void setFormatter(LogFormatter::ptr formatter);
+    void setFormatter(const std::string & val);
+    LogFormatter::ptr getFormatter();
+
     const std::string& getName() const { return m_name; }
 
     void setRoot(ptr logger) { m_root = logger; }
@@ -168,6 +177,7 @@ private:
     std::list<LogAppender::ptr> m_appenders;
     LogLevel::Level m_level;
     LogFormatter::ptr m_formatter;
+    MutexType m_mutex;
 
 };
 

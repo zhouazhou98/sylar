@@ -16,6 +16,7 @@ public:
         m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
     }
     Logger::ptr getLogger(std::string name) {
+        Mutex::Lock lock(m_mutex);
         auto iter = m_loggers.find(name);
         if (iter != m_loggers.end()) 
             return iter->second;
@@ -31,6 +32,7 @@ public:
 private:
     std::map<std::string, Logger::ptr> m_loggers;
     Logger::ptr m_root;
+    Mutex m_mutex;
 
 };
 

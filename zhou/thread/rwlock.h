@@ -102,6 +102,27 @@ private:
     pthread_rwlock_t m_lock;
 
 };
+class NullRWMutex {
+public:
+    typedef ReadScopedLockImpl<NullRWMutex> ReadLock;
+    typedef WriteScopedLockImpl<NullRWMutex> WriteLock;
+
+    NullRWMutex() {
+    }
+
+    ~NullRWMutex() {
+    }
+
+    void rdlock() {
+    }
+    void wrlock() {
+    }
+
+    void unlock() {
+    }
+private:
+
+};
 
 }   // ! RWMutex
 

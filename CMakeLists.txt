@@ -86,6 +86,14 @@ add_dependencies(${TEST_EXEC} zhou)
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
+# 生成测试文件 test                    
+set(TEST_EXEC test_thread_log)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
 
 # --------------------------------------------------------
 

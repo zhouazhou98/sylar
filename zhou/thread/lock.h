@@ -57,6 +57,17 @@ private:
     pthread_mutex_t m_mutex;
 };
 
+class NullMutex {
+public:
+    typedef ScopedLockImpl<NullMutex> Lock;
+    NullMutex() {}
+    ~NullMutex() {}
+    void lock() {}
+    void unlock() {}
+private:
+
+};
+
 }   // ! Mutex
 
 #endif      // !__ZHOU_LOCK_H__

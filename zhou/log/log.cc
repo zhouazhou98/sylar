@@ -44,6 +44,7 @@ Logger::Logger(const std::string & name)
 
 void Logger::log (LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
+        MutexType::Lock lock(m_mutex);
         for (auto iter = m_appenders.begin(); iter != m_appenders.end(); iter++)
             (*iter)->log(shared_from_this(), level, event);
     }
@@ -74,17 +75,43 @@ void Logger::fatal (LogEvent::ptr event) {
 }
 
 void Logger::addAppender (LogAppender::ptr appender) {
+    MutexType::Lock lock(m_mutex);
     if (!appender->getFormatter()) {
         appender->setFormatter(m_formatter);
     }
     m_appenders.push_back(appender);
 }
 void Logger::delAppender (LogAppender::ptr appender) {
+    MutexType::Lock lock(m_mutex);
     for (auto iter = m_appenders.begin(); iter != m_appenders.end(); iter++)
         if (*iter == appender) {
             m_appenders.erase(iter);
+            break;
         }
 }
+
+void Logger::setFormatter(LogFormatter::ptr formatter) {
+    MutexType::Lock lock(m_mutex);
+    m_formatter = formatter;
+
+    for (auto i : m_appenders) {
+        if (!i->getFormatter()) {
+            i->setFormatter(m_formatter);
+        }
+    }
+}
+
+void Logger::setFormatter(const std::string & val) {
+    LogFormatter::ptr new_val(new LogFormatter(val));
+
+    setFormatter(new_val);
+}
+
+LogFormatter::ptr Logger::getFormatter() {
+    MutexType::Lock lock(m_mutex);
+    return m_formatter;
+}
+
 
 } // !Logger
 
@@ -96,16 +123,34 @@ void Logger::delAppender (LogAppender::ptr appender) {
 
 namespace zhou { // LogAppender
 
+// 对于复杂类型的修改一般需要上锁，而对于基础类型一般最多只会发生 [数值不准确] 的问题
+// 所以对于 level 的设置这里就不加锁了
+// TODO: 配置系统与日志系统整合 - 这里还有 toYaml 等函数的设置，由于配置系统还没写，这里暂时不处理
+
+
+void LogAppender::setFormatter(LogFormatter::ptr formatter) {
+    MutexType::Lock lock(m_mutex);
+    m_formatter = formatter;
+}
+
+LogFormatter::ptr LogAppender::getFormatter() {
+    MutexType::Lock lock(m_mutex);
+    return m_formatter;
+}
+
+
 FileLogAppender::FileLogAppender(const std::string& filename) 
         : m_filename(filename) {
             reopen();
 }
 void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
+        MutexType::Lock lock(m_mutex);
         m_filestream << m_formatter->format(logger, level, event);
     }
 }
 bool FileLogAppender::reopen() {
+    MutexType::Lock lock(m_mutex);
     if (m_filestream) {
         m_filestream.close();
     }
@@ -115,6 +160,7 @@ bool FileLogAppender::reopen() {
 
 void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
+        MutexType::Lock lock(m_mutex);
         std::cout << m_formatter->format(logger, level, event);
         
     }
