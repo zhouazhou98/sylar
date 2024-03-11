@@ -383,4 +383,4 @@ namespace zhou{
 
 
 
-#endif // !__ZHOU_LOG_H__
+#endif // ! __ZHOU_LOG_H__

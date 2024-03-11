@@ -28,6 +28,6 @@ private:
 };
 
 
-}   // !__ZHOU_SEMAPHORE_H__
+}   // ! __ZHOU_SEMAPHORE_H__
 
-#endif      // !__ZHOU_SEMAPHORE_H__
+#endif      // ! __ZHOU_SEMAPHORE_H__

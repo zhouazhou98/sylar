@@ -49,4 +49,4 @@ private:
 
 }
 
-#endif // !__ZHOU_THREAD_H__
+#endif // ! __ZHOU_THREAD_H__

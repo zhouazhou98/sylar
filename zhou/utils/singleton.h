@@ -19,4 +19,4 @@ private:
 
 }
 
-#endif// !__ZHOU_SINGLETON_H__
+#endif// ! __ZHOU_SINGLETON_H__

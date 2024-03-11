@@ -122,4 +122,4 @@ private:
 }   // ! CASLock
 
 
-#endif      // !__ZHOU_LOCK_H__
+#endif      // ! __ZHOU_LOCK_H__

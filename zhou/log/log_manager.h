@@ -42,5 +42,5 @@ typedef Singleton<LoggerManager> SingleLoggerManager;
 
 }   // !LOG_MANAGER
 
-#endif  // !__ZHOU_LOG_MANAGER__H_
+#endif  // ! __ZHOU_LOG_MANAGER__H_
 

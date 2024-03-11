@@ -34,4 +34,4 @@
 #define ZHOU_ERROR_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::ERROR, fmt,## __VA_ARGS__)
 #define ZHOU_FATAL_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::FATAL, fmt,## __VA_ARGS__)
 
-#endif  // !__ZHOU_UTIL_MACRO_H__
+#endif  // ! __ZHOU_UTIL_MACRO_H__

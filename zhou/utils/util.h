@@ -8,4 +8,4 @@ namespace zhou {
 uint32_t GetFiberId();
 }
 
-#endif  // !__ZHOU_UTIL_H__
+#endif  // ! __ZHOU_UTIL_H__
