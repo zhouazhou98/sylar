@@ -118,7 +118,7 @@ private:
 class LogAppender {
 public:
     typedef std::shared_ptr<LogAppender> ptr;
-    typedef Mutex MutexType;
+    typedef SpinLock MutexType;
     virtual ~LogAppender() {}
 
     // log 函数为纯虚函数，需要由子类实现该方法
@@ -144,7 +144,7 @@ class Logger : public std::enable_shared_from_this<Logger> {
     // friend class LogManager;
 public:
     typedef std::shared_ptr<Logger> ptr;
-    typedef Mutex MutexType;
+    typedef SpinLock MutexType;
 
 
     // 这里使用 & 传入 std::string 引用，即在传参数时不需要传入整个字符串
