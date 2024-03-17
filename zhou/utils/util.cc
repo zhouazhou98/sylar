@@ -43,7 +43,7 @@ void Backtrace(std::vector<std::string> & bt, int size, int skip) {
     free(array);
 }
 
-std::string BacktraceToStriing(int size, int skip, const std::string & prefix) {
+std::string BacktraceToString(int size, int skip, const std::string & prefix) {
     std::vector<std::string> bt;
     Backtrace(bt, size, skip);
     std::stringstream ss;

@@ -34,4 +34,24 @@
 #define ZHOU_ERROR_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::ERROR, fmt,## __VA_ARGS__)
 #define ZHOU_FATAL_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::FATAL, fmt,## __VA_ARGS__)
 
+
+
+#include <assert.h>
+
+#define ZHOU_ASSERT(x)  \
+    if (!(x)) {         \
+        ZHOU_ERROR(zhou::Logger::ptr(zhou::SingleLoggerManager::GetInstance()->getLogger("root"))) << "\n\t[ASSERTION]: " #x  \
+                        <<  "\n\t[Backtrace]: \n"     \
+                        << zhou::BacktraceToString(100, 2, "\t\t");      \
+        assert(x);  \
+    }
+#define ZHOU_ASSERT2(x, w)  \
+    if (!(x)) {         \
+        ZHOU_ERROR(zhou::Logger::ptr(zhou::SingleLoggerManager::GetInstance()->getLogger("root"))) << "\n\t[ASSERTION]: " #x  \
+                        << "\n\t\t" << w                \
+                        <<  "\n\t[Backtrace]: \n"     \
+                        << zhou::BacktraceToString(100, 2, "\t\t");      \
+        assert(x);  \
+    }
+
 #endif  // ! __ZHOU_UTIL_MACRO_H__

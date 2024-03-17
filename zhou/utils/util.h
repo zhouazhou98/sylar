@@ -9,7 +9,7 @@ namespace zhou {
 
 uint32_t GetFiberId();
 void Backtrace(std::vector<std::string> & bt, int size, int skip);
-std::string BacktraceToStriing(int size, int skip, const std::string & prefix = "");
+std::string BacktraceToString(int size, int skip, const std::string & prefix = "");
 }
 
 #endif  // ! __ZHOU_UTIL_H__
