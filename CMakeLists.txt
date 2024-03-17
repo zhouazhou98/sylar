@@ -10,7 +10,8 @@ project(zhou)
 # CMake 过程中输出 Makefile 执行过程中详细的命令
 set(CMAKE_VERBOSE_MAKEFILE ON)
 # 自定义 Make 编译参数
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -ggdb -pg -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+# set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -ggdb -pg -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 
 
 # --------------------------------------------------------
@@ -35,11 +36,13 @@ set(LIB_SRC
 
 # --------------------------------------------------------
 
+include (cmake/utils.cmake)
 
 # --- 动态库 --- 
 
 # 添加 .so 共享库 zhou ， 其使用 LIB_SRC 变量中的源文件构建而成
 add_library(zhou SHARED ${LIB_SRC})
+force_redefine_file_macro_for_sources(zhou) #__FILE__
 
 
 # --- 静态库 --- 
@@ -58,6 +61,8 @@ set(TEST_EXEC test)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
@@ -67,6 +72,8 @@ set(TEST_EXEC test_thread)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
@@ -75,6 +82,8 @@ set(TEST_EXEC test_rwlock)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
@@ -83,6 +92,8 @@ set(TEST_EXEC test_lock)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
@@ -91,11 +102,26 @@ set(TEST_EXEC test_thread_log)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_util)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
 # 其链接时需要链接到 zhou.so 共享库          
 target_link_libraries(${TEST_EXEC} zhou) 
 
 
+
 # --------------------------------------------------------
+
+
 
 # 可执行（测试）文件生成路径
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
