@@ -2,6 +2,8 @@
 #include "fiber.h"
 #include <atomic>
 
+zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
+
 namespace zhou {
 
 static std::atomic<uint64_t> s_fiber_id {0};
@@ -33,6 +35,7 @@ Fiber::Fiber() {
     }
 
     ++s_fiber_count;
+    ZHOU_DEBUG(g_logger) << "Fiber::Fiber()";
 
 }
 // public 初始化
@@ -55,6 +58,7 @@ Fiber::Fiber(std::function<void()> callback, size_t stacksize)
     m_ctx.uc_stack.ss_size = m_stacksize;
 
     makecontext(&this->m_ctx, &MainFunc, 0);
+    ZHOU_DEBUG(g_logger) << "Fiber::Fiber id = " << m_id;
 }
 Fiber::~Fiber() {
     --s_fiber_count;
@@ -72,6 +76,7 @@ Fiber::~Fiber() {
         }
     }
 
+    ZHOU_DEBUG(g_logger) << "Fiber::~Fiber id = " << m_id;
 }
 void Fiber::reset(std::function<void()> callback) {
     ZHOU_ASSERT(m_stack);

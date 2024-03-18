@@ -14,7 +14,6 @@ void test() {
 
 int main() {
     ZHOU_INFO(g_logger) << "main fucntion begin";
-    // zhou::Fiber::ptr main_fiber = zhou::Fiber::GetThis();
     zhou::Fiber::ptr fiber(new zhou::Fiber(&test));
     ZHOU_INFO(g_logger) << "before swap in fiber";
     fiber->swapIn();
