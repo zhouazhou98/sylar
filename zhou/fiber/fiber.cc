@@ -204,6 +204,9 @@ void Fiber::MainFunc() {
     Fiber * raw_ptr = curr.get();
     curr.reset();
     raw_ptr->swapOut();
+
+    // 如果想要执行这一步，应该将上述的 swapOut 操作改为 ucontext_t uc_link 实现
+    ZHOU_ASSERT2(false, "do not exec forever");
 }
 
 
