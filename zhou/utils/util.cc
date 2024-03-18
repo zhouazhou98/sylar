@@ -1,9 +1,10 @@
 #include "util.h"
+#include "zhou/fiber/fiber.h"
 
 namespace zhou {
 
 uint32_t GetFiberId() {
-    return 0;
+    return zhou::Fiber::GetFiberId();
 }
 }
 

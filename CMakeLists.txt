@@ -26,11 +26,13 @@ include_directories(.)
 
 # 将源码文件设置到变量 LIB_SRC
 set(LIB_SRC
-    zhou/log/log.cc
+    zhou/log/log.cc             # 日志模块
     zhou/utils/util.cc
-    zhou/thread/thread.cc
-    zhou/thread/semaphore.cc    # 同步
-    # zhou/thread/lock.cc         # 互斥
+    zhou/thread/thread.cc       # 线程模块
+    zhou/thread/semaphore.cc        # 同步
+    # zhou/thread/lock.cc           # 互斥
+    zhou/fiber/fiber.cc         # 协程模块
+    zhou/fiber/stack_allocator.cc   # 协程栈分配器
     )
 
 
@@ -109,6 +111,16 @@ target_link_libraries(${TEST_EXEC} zhou)
 
 # 生成测试文件 test                    
 set(TEST_EXEC test_util)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_fiber)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      

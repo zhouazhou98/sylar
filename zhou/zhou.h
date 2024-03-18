@@ -13,4 +13,7 @@
 #include "thread/lock.h"        // 互斥： 锁
 #include "thread/rwlock.h"      // 互斥： 读写锁
 
+#include "fiber/fiber.h"
+#include "fiber/stack_allocator.h"
+
 #endif // ! __ZHOU_H__
