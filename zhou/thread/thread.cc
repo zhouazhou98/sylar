@@ -1,4 +1,9 @@
-#include "thread.h"
+#include "zhou/utils/macro.h"
+#include "zhou/utils/util.h"
+#include "zhou/log/log.h"
+#include "zhou/log/log_manager.h"
+
+#include "zhou/fiber/fiber.h"
 
 namespace zhou {
 

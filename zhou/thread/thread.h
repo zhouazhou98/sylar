@@ -1,7 +1,7 @@
 #ifndef __ZHOU_THREAD_H__
 #define __ZHOU_THREAD_H__
 
-#include "zhou/zhou.h"
+// #include "zhou/zhou.h"
 #include "semaphore.h"
 #include "lock.h"
 

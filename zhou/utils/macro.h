@@ -10,7 +10,7 @@
     if (logger->getLevel() <= level)    \
         zhou::LogEventWrap(   logger, \
                         level,  \
-                        zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, syscall(SYS_gettid), zhou::GetFiberId(), time(0)) )   \
+                        zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, syscall(SYS_gettid), zhou::GetFiberId(), time(0), zhou::Thread::GetName()) )   \
             ).getSS()
 
 #define ZHOU_TRACE(logger)  ZHOU_LOG(logger, zhou::LogLevel::TRACE)
@@ -24,7 +24,7 @@
     if (logger->getLevel() <= level)    \
         zhou::LogEventWrap(   logger, \
                         level,  \
-                        zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, syscall(SYS_gettid), zhou::GetFiberId(), time(0)) )   \
+                        zhou::LogEvent::ptr(new zhou::LogEvent(__FILE__, __LINE__, 0, syscall(SYS_gettid), zhou::GetFiberId(), time(0), zhou::Thread::GetName()) )   \
             ).format(fmt, ## __VA_ARGS__)
 
 #define ZHOU_TRACE_FMT(logger, fmt, ...)  ZHOU_LOG_FMT(logger, zhou::LogLevel::TRACE, fmt,## __VA_ARGS__)

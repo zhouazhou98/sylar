@@ -358,7 +358,7 @@ void LogFormatter::init() {
         XX(l, Line),              //l: 行号
         XX(T, Tab),               //T: Tab
         XX(F, FiberId),           //F: 协程id
-        //XX(N, ThreadName),        //N: 线程名称
+        XX(N, ThreadName),        //N: 线程名称
 #undef XX
     };
 
@@ -389,9 +389,10 @@ void LogFormatter::init() {
 namespace zhou {    // LogEvent
 
     LogEvent::LogEvent(   const char* filename, int32_t line, uint32_t elapse, 
-                pthread_t threadId, uint32_t fiberId, uint64_t time
+                pthread_t threadId, uint32_t fiberId, uint64_t time, 
+                std::string & threadName
     ) : m_filename(filename), m_line(line), m_elapse(elapse), m_threadId(threadId),
-    m_fiberId(fiberId), m_time(time) {
+    m_fiberId(fiberId), m_time(time), m_threadName(threadName) {
     }
 
 }   // !LogEvent
