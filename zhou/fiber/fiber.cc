@@ -39,9 +39,9 @@ Fiber::Fiber() {
 Fiber::Fiber(std::function<void()> callback, size_t stacksize)
         :   m_id(++s_fiber_id),
             m_callback(callback) {
-    // if (!t_main_fiber) {
-    //     t_main_fiber = zhou::Fiber::ptr(new zhou::Fiber);
-    // }
+    if (!t_main_fiber) {
+        t_main_fiber = zhou::Fiber::ptr(new zhou::Fiber);
+    }
     ++s_fiber_count;
     m_stacksize = stacksize ? stacksize : g_fiber_stacksize;
 
