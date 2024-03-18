@@ -63,11 +63,11 @@ Fiber::~Fiber() {
 
         StackAllocator::Dealloc(m_stack, m_stacksize);
     } else {
-        ZHOU_ASSERT(m_callback);
-        ZHOU_ASSERT(m_state == EXEC);
-
-        Fiber::ptr cur = t_fiber;
-        if (cur == shared_from_this()) {
+        if (t_main_fiber.get() != this) {
+            ZHOU_ASSERT(m_callback);
+            ZHOU_ASSERT(m_state == EXEC);
+        }
+        if (t_fiber.get() == this) {
             SetThis(nullptr);
         }
     }
@@ -107,7 +107,8 @@ void Fiber::swapIn() {
 // 将当前协程切换到后台， 将 CPU 控制权交换给 main fiber 进行后续调度
 void Fiber::swapOut() {
     SetThis(t_main_fiber);
-    ZHOU_ASSERT(m_state == EXEC || m_state == READY || m_state == HOLD);
+    
+    ZHOU_ASSERT(m_state == EXEC || m_state == READY || m_state == HOLD || m_state == TERM || m_state == EXCEPT);
 
     // 由于该函数被 Yeild 调用，会在 Yeild 函数中设置其 m_state ，这里不再进行设置
     // m_state = HOLD;
@@ -185,6 +186,7 @@ void Fiber::MainFunc() {
         curr->m_state = EXCEPT;
         ZHOU_ERROR(zhou::SingleLoggerManager::GetInstance()->getLogger("system")) << "Fiber EXCEPT";
     }
+    curr->swapOut();
 }
 
 
