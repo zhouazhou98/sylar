@@ -6,8 +6,8 @@ zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger
 
 void test() {
     ZHOU_INFO(g_logger) << "run in fiber begin";
-    zhou::Fiber::GetThis()->YeildToHold();
-    // zhou::Fiber::GetThis()->swapOut();
+    // zhou::Fiber::GetThis()->YeildToHold();
+    zhou::Fiber::GetThis()->swapOut();
     ZHOU_INFO(g_logger) << "run in fiber end";
 
 }

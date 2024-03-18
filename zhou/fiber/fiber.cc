@@ -107,6 +107,10 @@ void Fiber::swapIn() {
 // 将当前协程切换到后台， 将 CPU 控制权交换给 main fiber 进行后续调度
 void Fiber::swapOut() {
     SetThis(t_main_fiber);
+
+    if (m_state == EXEC) {
+        m_state = HOLD;
+    }
     
     ZHOU_ASSERT(m_state == EXEC || m_state == READY || m_state == HOLD || m_state == TERM || m_state == EXCEPT);
 
