@@ -76,6 +76,11 @@ Fiber::~Fiber() {
         }
     }
 
+    // if (t_main_fiber.get() == this) {
+    //     ZHOU_DEBUG(g_logger) << "Fiber::~Fiber main fiber";
+    //     t_fiber.reset();
+    // }
+
     ZHOU_DEBUG(g_logger) << "Fiber::~Fiber id = " << m_id;
 }
 void Fiber::reset(std::function<void()> callback) {
@@ -195,7 +200,10 @@ void Fiber::MainFunc() {
         curr->m_state = EXCEPT;
         ZHOU_ERROR(zhou::SingleLoggerManager::GetInstance()->getLogger("system")) << "Fiber EXCEPT";
     }
-    curr->swapOut();
+    
+    Fiber * raw_ptr = curr.get();
+    curr.reset();
+    raw_ptr->swapOut();
 }
 
 
