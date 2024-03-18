@@ -1,5 +1,6 @@
 
 
+
 #include "zhou/zhou.h"
 
 zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
@@ -26,7 +27,18 @@ int main() {
     zhou::Thread::SetName("main");
 
     ZHOU_INFO(g_logger) << "main begin";
-    test_fiber();
+    
+    std::vector<zhou::Thread::ptr> threads;
+    for (int i = 0; i < 3; i++) {
+        threads.push_back(
+            zhou::Thread::ptr(new zhou::Thread(&test_fiber, "thread_" + std::to_string(i)))
+        );
+    }
+
+    for (int i = 0; i < 3; i++) {
+        threads[i]->join();
+    }
+
     ZHOU_INFO(g_logger) << "main end";
 
     return 0;

@@ -39,7 +39,7 @@ Fiber::Fiber() {
     }
 
     ++s_fiber_count;
-    ZHOU_DEBUG(g_logger) << "Fiber::Fiber()";
+    ZHOU_DEBUG(g_logger) << "Fiber::Fiber() main id = " << m_id;
 
 }
 // public 初始化
