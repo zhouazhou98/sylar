@@ -10,7 +10,7 @@
 
 namespace zhou {
 
-class Scheduler {
+class Scheduler : public std::enable_shared_from_this<Scheduler> {
 public:
     typedef std::shared_ptr<Scheduler> ptr;
     typedef Mutex MutexType;
@@ -69,6 +69,7 @@ public:
 
 protected:
     virtual void tickle();
+    void run();
 
 private:
     template <class FiberOrCallback>
@@ -129,11 +130,23 @@ private:
     std::vector<Thread::ptr> m_threads; // 线程池
     std::string m_name;
 
+    // 调度器的主协程： 当使用的线程是一个新的线程时， 新的线程的主协程并不会参与到我们的协程调度中去， 因此我们要专门做一个新的协程去做 schdule
+    Fiber::ptr m_rootFiber;             
+
     // m_fibers 并不见得都是 fiber 对象， 也可能是一个函数
     //      总之，一个协程也不过是一段代码执行逻辑
     // B 站弹幕： 这个是有栈非对称协程
     std::list<FiberAndFunc::ptr> m_fibers;  // 用来保存即将要执行或计划要执行的 协程 / 函数
 
+
+protected:
+    std::vector<int> m_threadIds;       // 保存线程 ID： 方便后续指定线程运行
+    size_t m_threadCount = 0;           // 线程总数
+    size_t m_activeThreadCount = 0;     // 活跃线程的数量
+    size_t m_idleThreadCount = 0;       // 空闲线程的数量
+    bool m_stopping = true;             // 执行状态： 是否停止
+    bool m_autoStop = false;            // 是否自动停止
+    int m_rootThreadId = 0;             // 即 use_caller 的 ID
 };
 
 }

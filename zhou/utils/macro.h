@@ -37,6 +37,7 @@
 
 
 #include <assert.h>
+#include "util.h"
 
 #define ZHOU_ASSERT(x)  \
     if (!(x)) {         \
