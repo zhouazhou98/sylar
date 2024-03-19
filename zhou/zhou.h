@@ -13,7 +13,8 @@
 #include "thread/lock.h"        // 互斥： 锁
 #include "thread/rwlock.h"      // 互斥： 读写锁
 
-#include "fiber/fiber.h"
-#include "fiber/stack_allocator.h"
+#include "fiber/fiber.h"            // 协程： ucontext_t 封装
+#include "fiber/stack_allocator.h"  // 协程栈内存分配： 这里暂时用的 malloc 分配到堆上
+#include "fiber/scheduler.h"        // 协程调度器
 
 #endif // ! __ZHOU_H__

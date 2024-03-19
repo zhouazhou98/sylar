@@ -26,13 +26,14 @@ include_directories(.)
 
 # 将源码文件设置到变量 LIB_SRC
 set(LIB_SRC
-    zhou/log/log.cc             # 日志模块
+    zhou/log/log.cc                     # 日志模块
     zhou/utils/util.cc
-    zhou/thread/thread.cc       # 线程模块
-    zhou/thread/semaphore.cc        # 同步
-    # zhou/thread/lock.cc           # 互斥
-    zhou/fiber/fiber.cc         # 协程模块
-    zhou/fiber/stack_allocator.cc   # 协程栈分配器
+    zhou/thread/thread.cc               # 线程模块
+    zhou/thread/semaphore.cc                # 同步
+    # zhou/thread/lock.cc                   # 互斥
+    zhou/fiber/fiber.cc                 # 协程模块
+    zhou/fiber/stack_allocator.cc           # 协程栈分配器
+    zhou/fiber/scheduler.cc             # 协程调度器（线程池）
     )
 
 
