@@ -5,7 +5,7 @@
 #include "zhou/utils/macro.h"
 
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
 
@@ -22,7 +22,7 @@ Scheduler::Scheduler(int thread_count, bool use_caller, const std::string & name
     if (use_caller) {
         // 当前线程如果没有主协程，则创建一个主协程
         Fiber::GetThis();
-        --thread_count;
+        thread_count = thread_count - 1;
 
         // 说明当前线程还没有创建过 协程调度器 Scheduler
         ZHOU_ASSERT(GetThis() == nullptr);
@@ -47,6 +47,12 @@ Scheduler::Scheduler(int thread_count, bool use_caller, const std::string & name
 
 }
 Scheduler::~Scheduler(){
+    ZHOU_INFO(g_logger) << "Scheduler::~Scheduler";
+
+    if (t_scheduler) {
+        t_scheduler.reset();
+    }
+
     ZHOU_ASSERT(m_stopping);
     if (GetThis().get() == this) {
         t_scheduler.reset();
@@ -56,7 +62,10 @@ Scheduler::~Scheduler(){
 
 
 void Scheduler::setThis() {
-    t_scheduler = shared_from_this();
+    if (!t_scheduler) {
+        Scheduler::ptr sc(shared_from_this());
+        t_scheduler.swap(sc);
+    }
 }
 
 // 获得当前调度器
@@ -73,7 +82,10 @@ Fiber::ptr Scheduler::GetMainFiber(){
 
 // 核心： 创建对应数量的线程， start() 执行完成后， 等待接下来需要处理的 协程 或 函数 进行 schedule
 void Scheduler::start(){
-    t_scheduler = shared_from_this();
+    this->setThis();
+    // if (!t_scheduler) {
+    //     t_scheduler = shared_from_this();
+    // }
     MutexType::Lock lock(m_mutex);
 
     if (!m_stopping) return;
@@ -83,11 +95,11 @@ void Scheduler::start(){
     ZHOU_ASSERT(m_threads.empty());
     m_threads.resize(m_threadCount);
     for (size_t i = 0; i < m_threadCount; i++) {
-        m_threads.push_back(
-            Thread::ptr(new Thread(
+        m_threads[i].reset(
+            new Thread(
                 std::bind(&Scheduler::run, this)
                 , m_name + "_" + std::to_string(i)
-            ))
+            )
         );
         m_threadIds.push_back(m_threads[i]->getId());
     }
@@ -99,6 +111,8 @@ void Scheduler::start(){
 // 2. 由各个被调度的线程来执行调度器分配的 [协程] 或 [函数]
 // 3. 等待所有子线程执行完毕， 即 所有 [协程] 或 [函数] 都执行完成， 线程 join 后退出
 void Scheduler::stop() {
+    ZHOU_INFO(g_logger) << t_scheduler.use_count();
+
     m_autoStop = true;
     if (m_rootFiber
             && m_threadCount == 0
@@ -116,9 +130,9 @@ void Scheduler::stop() {
 
     // bool exist_on_this_fiber = false;
     if (m_rootThreadId == -1) {
-        ZHOU_ASSERT(GetThis().get() == this)
-    } else {
         ZHOU_ASSERT(GetThis().get() != this)
+    } else {
+        ZHOU_ASSERT(GetThis() == shared_from_this())
     }
     m_stopping = true;
     for (size_t i = 0; i < m_threadCount; i++) {
@@ -133,6 +147,10 @@ void Scheduler::stop() {
             return;
         }
     }
+
+    for (auto iter = m_threads.begin(); iter != m_threads.end(); iter++) {
+        (*iter)->join();
+    }
 }
 
 
@@ -143,6 +161,8 @@ void Scheduler::run() {
     // 设置当前线程的调度器为创建该线程的 scheduler
     //      主要是靠 std::bind 函数来传入 scheduler 指针
     setThis();
+    // ZHOU_INFO(g_logger) << t_scheduler.use_count();
+
 
     if ( syscall(SYS_gettid) != m_rootThreadId ) {
         t_scheduler_fiber = Fiber::GetThis();
@@ -184,7 +204,7 @@ void Scheduler::run() {
             tickle();
         }
 
-        if (fc.fiber 
+        if ( (*(int*)&fc != 0) && (fc.fiber) 
             && (        (fc.fiber->getState() != Fiber::TERM)
                     &&  (fc.fiber->getState() != Fiber::EXCEPT)
                 )
@@ -237,8 +257,8 @@ void Scheduler::run() {
             ++m_idleThreadCount;
             idle_fiber->swapIn();
             if (
-                        (fc.fiber->getState() != Fiber::TERM)
-                    &&  (fc.fiber->getState() != Fiber::EXCEPT)
+                        (idle_fiber->getState() != Fiber::TERM)
+                    &&  (idle_fiber->getState() != Fiber::EXCEPT)
             ) {
                 idle_fiber->setState(Fiber::HOLD);
             }

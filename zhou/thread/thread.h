@@ -21,7 +21,7 @@ public:
     Thread(std::function<void()> callback, const std::string & name);
     ~Thread();
 
-    const pid_t getId() const { return m_id; }
+    pid_t getId() const { return m_id; }
     const std::string& getName() const { return m_name; }
 
     void join();
