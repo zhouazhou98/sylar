@@ -214,6 +214,22 @@ void Fiber::MainFunc() {
 }
 
 
+void Fiber::call() {
+    SetThis(shared_from_this());
+    m_state = EXEC;
+    ZHOU_INFO(g_logger) << m_id;
+    if(swapcontext(&t_main_fiber->m_ctx, &m_ctx)) {
+        ZHOU_ASSERT2(false, "swapcontext");
+    }
+}
+
+void Fiber::back() {
+    SetThis(t_main_fiber);
+    if(swapcontext(&m_ctx, &t_main_fiber->m_ctx)) {
+        ZHOU_ASSERT2(false, "swapcontext");
+    }
+}
+
 }
 
 

@@ -5,7 +5,7 @@
 #include "zhou/utils/macro.h"
 
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
 
@@ -130,7 +130,7 @@ void Scheduler::stop() {
 
     // bool exist_on_this_fiber = false;
     if (m_rootThreadId == -1) {
-        ZHOU_ASSERT(GetThis().get() != this)
+        ZHOU_ASSERT(GetThis().get() == this)
     } else {
         ZHOU_ASSERT(GetThis() == shared_from_this())
     }
@@ -144,7 +144,7 @@ void Scheduler::stop() {
 
     if (m_rootFiber) {
         if (!stopping()) {
-            return;
+            m_rootFiber->call();
         }
     }
 
@@ -162,6 +162,8 @@ void Scheduler::run() {
     //      主要是靠 std::bind 函数来传入 scheduler 指针
     setThis();
     // ZHOU_INFO(g_logger) << t_scheduler.use_count();
+        ZHOU_INFO(g_logger) << "thread id: " << syscall(SYS_gettid);
+        //sleep(100);
 
 
     if ( syscall(SYS_gettid) != m_rootThreadId ) {
@@ -177,10 +179,11 @@ void Scheduler::run() {
     while (true) {
         fc.reset();     // 调用成员函数将内部成员变量重置
         bool tickle_me = false;
+        bool is_active = false;
         {
             MutexType::Lock lock(m_mutex);
             for (auto iter = m_fibers.begin(); iter != m_fibers.end(); iter++) {
-                if ((*iter)->thread_id != -1 && (*iter)->thread_id != syscall(SYS_gettid)) {
+                if (((*iter)->thread_id != -1) && ( (*iter)->thread_id != syscall(SYS_gettid) ) ) {
                     // 该 [协程] 或 [函数] 已经指定了其必须在哪个线程中执行
                     tickle_me = true;       // 该线程不需要处理这个 [协程] 或 [函数]， 但需要通知其它线程去处理
                     continue;
@@ -196,6 +199,8 @@ void Scheduler::run() {
                 fc = **iter;
                 m_fibers.erase(iter);
                 ++m_activeThreadCount;
+                is_active = true;
+                break;
                 
             }
         }
@@ -251,18 +256,22 @@ void Scheduler::run() {
 
             fc.reset();
         } else {
+            if (is_active) {
+                --m_activeThreadCount;
+                continue;
+            }
             if (idle_fiber->getState() == Fiber::TERM) {
                 break;
             }
             ++m_idleThreadCount;
             idle_fiber->swapIn();
+            --m_idleThreadCount;
             if (
                         (idle_fiber->getState() != Fiber::TERM)
                     &&  (idle_fiber->getState() != Fiber::EXCEPT)
             ) {
                 idle_fiber->setState(Fiber::HOLD);
             }
-            --m_idleThreadCount;
 
         }
     }

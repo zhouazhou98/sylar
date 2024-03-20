@@ -49,6 +49,8 @@ public:
     void swapIn();
     // 将当前协程切换到后台
     void swapOut();
+    void call();
+    void back();
 
 public:
     static void SetThis(Fiber::ptr fiber);
