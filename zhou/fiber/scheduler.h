@@ -25,6 +25,7 @@ public:
     const std::string & getName() { return m_name; }
 
 
+    void setThis();
     // 获得当前调度器
     static Scheduler::ptr GetThis();
     // 调度器的主协程
@@ -69,14 +70,16 @@ public:
 
 protected:
     virtual void tickle();
+    virtual bool stopping();
     void run();
+    virtual void idle();
 
 private:
     template <class FiberOrCallback>
     bool scheduleNoLock(FiberOrCallback fc, int thread_id) {
         bool need_tickle = m_fibers.empty();
         FiberAndFunc::ptr fc_p(new FiberAndFunc(fc, thread_id) );
-        if (fc->fiber || fc->callback) {
+        if (fc_p->fiber || fc_p->callback) {
             m_fibers.push_back(fc_p);
         }
 
@@ -131,7 +134,7 @@ private:
     std::string m_name;
 
     // 调度器的主协程： 当使用的线程是一个新的线程时， 新的线程的主协程并不会参与到我们的协程调度中去， 因此我们要专门做一个新的协程去做 schdule
-    Fiber::ptr m_rootFiber;             
+    Fiber::ptr m_rootFiber;     // 只在创建本调度器的线程也需要被调度时才会有值
 
     // m_fibers 并不见得都是 fiber 对象， 也可能是一个函数
     //      总之，一个协程也不过是一段代码执行逻辑

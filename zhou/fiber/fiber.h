@@ -66,6 +66,9 @@ public:
     
     static void MainFunc();
 
+public:
+    void setState(Fiber::STATUS state) { m_state = state; }
+    Fiber::STATUS getState() { return m_state; }
 private:
     uint64_t m_id = 0;
     uint32_t m_stacksize = 0;
