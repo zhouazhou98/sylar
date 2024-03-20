@@ -5,7 +5,7 @@
 #include "zhou/utils/macro.h"
 
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
 namespace zhou {
 
