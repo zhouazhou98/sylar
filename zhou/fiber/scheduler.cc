@@ -144,7 +144,9 @@ void Scheduler::stop() {
 
     if (m_rootFiber) {
         if (!stopping()) {
-            m_rootFiber->call();
+            // 按理来说主线程在 run 方法执行结束后应该回到这里
+            m_rootFiber->swapIn();
+            // m_rootFiber->call();
         }
     }
 
@@ -173,6 +175,7 @@ void Scheduler::run() {
     Fiber::ptr idle_fiber(new Fiber(
                                 std::bind(&Scheduler::idle, this)
     ));
+    ZHOU_INFO(g_logger) << "create idle fiber id = " << idle_fiber->getId();
 
     Fiber::ptr callback_fiber;
     FiberAndFunc fc;

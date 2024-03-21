@@ -71,6 +71,7 @@ public:
 public:
     void setState(Fiber::STATUS state) { m_state = state; }
     Fiber::STATUS getState() { return m_state; }
+    uint64_t getId() { return m_id; }
 private:
     uint64_t m_id = 0;
     uint32_t m_stacksize = 0;
