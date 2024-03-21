@@ -6,7 +6,7 @@
 #include "fiber.h"
 #include <atomic>
 
-zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
 namespace zhou {
 
@@ -214,10 +214,10 @@ void Fiber::MainFunc() {
         curr->m_state = TERM;
     } catch (std::exception &ex) {
         curr->m_state = EXCEPT;
-        ZHOU_ERROR(zhou::SingleLoggerManager::GetInstance()->getLogger("system")) << "Fiber EXCEPT: " << ex.what();
+        ZHOU_ERROR(g_logger) << "Fiber EXCEPT: " << ex.what();
     } catch (...) {
         curr->m_state = EXCEPT;
-        ZHOU_ERROR(zhou::SingleLoggerManager::GetInstance()->getLogger("system")) << "Fiber EXCEPT";
+        ZHOU_ERROR(g_logger) << "Fiber EXCEPT";
     }
     
     Fiber * raw_ptr = curr.get();
