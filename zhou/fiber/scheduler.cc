@@ -162,6 +162,10 @@ void Scheduler::stop() {
 // 所有由调度器创建的线程， 其执行的都是该方法
 //      while 循环： 让所有的线程一直运行， 直到调度器给出命令让他们退出后， 它们才可以跳出循环
 void Scheduler::run() {
+    ucontext_t * root_fiber_ctx = nullptr;
+    if (m_rootFiber == Fiber::GetThis()) {
+        root_fiber_ctx = &m_root_fiber_ctx;
+    }
     // 设置当前线程的调度器为创建该线程的 scheduler
     //      主要是靠 std::bind 函数来传入 scheduler 指针
     setThis();
@@ -220,7 +224,7 @@ void Scheduler::run() {
                 )
         ) {
             // 1. 执行
-            fc.fiber->swapIn(&m_root_fiber_ctx);
+            fc.fiber->swapIn(root_fiber_ctx);
             --m_activeThreadCount;
             // 2. 检查执行后状态
             if (fc.fiber->getState() == Fiber::READY) {
@@ -243,7 +247,7 @@ void Scheduler::run() {
                 fc.callback = nullptr;
             }
             // 2. 执行
-            callback_fiber->swapIn(&m_root_fiber_ctx);
+            callback_fiber->swapIn(root_fiber_ctx);
             --m_activeThreadCount;
             // 3. 检查执行后状态
             if (callback_fiber->getState() == Fiber::READY) {
@@ -269,7 +273,7 @@ void Scheduler::run() {
                 break;
             }
             ++m_idleThreadCount;
-            idle_fiber->swapIn(&m_root_fiber_ctx);
+            idle_fiber->swapIn(root_fiber_ctx);
             --m_idleThreadCount;
             if (
                         (idle_fiber->getState() != Fiber::TERM)
