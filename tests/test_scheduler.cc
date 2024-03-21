@@ -24,7 +24,7 @@ void test2() {
 
 
 int main() {
-    zhou::Scheduler::ptr sc(new zhou::Scheduler(1, true, "hello"));
+    zhou::Scheduler::ptr sc(new zhou::Scheduler(10, false, "hello"));
     sc->start();
     sc->schedule([](){ zhou::Mutex::Lock lock(mutex); std::cout << "hello world!" << std::endl; });
     sc->schedule(&test);

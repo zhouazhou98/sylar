@@ -145,7 +145,7 @@ void Scheduler::stop() {
     if (m_rootFiber) {
         if (!stopping()) {
             // 按理来说主线程在 run 方法执行结束后应该回到这里
-            m_rootFiber->swapIn();
+            m_rootFiber->swapIn(&m_exit_ctx);
             // m_rootFiber->call();
         }
     }

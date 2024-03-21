@@ -107,15 +107,24 @@ void Fiber::reset(std::function<void()> callback) {
 
 // 切换进当前协程执行
 //      目前我理解的： 从主协程切换到当前协程
-void Fiber::swapIn() {
+void Fiber::swapIn(ucontext_t * exit_ctx) {
     SetThis(shared_from_this());
     // 需要切换到的这个协程当前一定没在执行， 所以需要调度执行它
     ZHOU_ASSERT(m_state != EXEC);
 
     m_state = EXEC;
-    if (swapcontext(&t_main_fiber->m_ctx, &this->m_ctx)) {
-        ZHOU_ASSERT2(0, "swapcontext");
+
+    if (exit_ctx) {
+        m_exit_ctx = exit_ctx;
+        if (swapcontext(exit_ctx, &this->m_ctx)) {
+            ZHOU_ASSERT2(0, "swapcontext");
+        }
+    } else {
+        if (swapcontext(&t_main_fiber->m_ctx, &this->m_ctx)) {
+            ZHOU_ASSERT2(0, "swapcontext");
+        }
     }
+
 
 }
 // 将当前协程切换到后台， 将 CPU 控制权交换给 main fiber 进行后续调度
@@ -130,8 +139,14 @@ void Fiber::swapOut() {
 
     // 由于该函数被 Yeild 调用，会在 Yeild 函数中设置其 m_state ，这里不再进行设置
     // m_state = HOLD;
-    if (swapcontext(&this->m_ctx, &t_main_fiber->m_ctx)) {
-        ZHOU_ASSERT2(0, "swapcontext");
+    if (m_exit_ctx) {
+        if (swapcontext(&this->m_ctx, m_exit_ctx)) {
+            ZHOU_ASSERT2(0, "swapcontext");
+        }
+    } else {
+        if (swapcontext(&this->m_ctx, &t_main_fiber->m_ctx)) {
+            ZHOU_ASSERT2(0, "swapcontext");
+        }
     }
 }
 

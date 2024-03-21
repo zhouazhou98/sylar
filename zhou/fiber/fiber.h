@@ -46,7 +46,7 @@ public:
     void reset(std::function<void()> callback);
 
     // 切换进当前协程执行
-    void swapIn();
+    void swapIn(ucontext_t * exit_ctx = nullptr);
     // 将当前协程切换到后台
     void swapOut();
     void call();
@@ -81,6 +81,10 @@ private:
     void * m_stack = nullptr;
 
     std::function<void()>  m_callback;
+
+    ucontext_t * m_exit_ctx = nullptr;
+
+
 };
 
 }       // ! __ZHOU_FIBER_H__
