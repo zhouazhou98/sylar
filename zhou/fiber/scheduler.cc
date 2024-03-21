@@ -53,6 +53,7 @@ Scheduler::~Scheduler(){
         t_scheduler.reset();
     }
 
+    ZHOU_INFO(g_logger) << "Scheduler::~Scheduler, m_stopping = " << m_stopping;
     ZHOU_ASSERT(m_stopping);
     if (GetThis().get() == this) {
         t_scheduler.reset();
@@ -145,7 +146,8 @@ void Scheduler::stop() {
     if (m_rootFiber) {
         if (!stopping()) {
             // 按理来说主线程在 run 方法执行结束后应该回到这里
-            m_rootFiber->swapIn(&m_exit_ctx);
+            // m_rootFiber->swapIn(&m_exit_ctx);
+            m_rootFiber->swapIn();
             // m_rootFiber->call();
         }
     }
@@ -218,7 +220,7 @@ void Scheduler::run() {
                 )
         ) {
             // 1. 执行
-            fc.fiber->swapIn();
+            fc.fiber->swapIn(&m_root_fiber_ctx);
             --m_activeThreadCount;
             // 2. 检查执行后状态
             if (fc.fiber->getState() == Fiber::READY) {
@@ -241,7 +243,7 @@ void Scheduler::run() {
                 fc.callback = nullptr;
             }
             // 2. 执行
-            callback_fiber->swapIn();
+            callback_fiber->swapIn(&m_root_fiber_ctx);
             --m_activeThreadCount;
             // 3. 检查执行后状态
             if (callback_fiber->getState() == Fiber::READY) {
@@ -267,7 +269,7 @@ void Scheduler::run() {
                 break;
             }
             ++m_idleThreadCount;
-            idle_fiber->swapIn();
+            idle_fiber->swapIn(&m_root_fiber_ctx);
             --m_idleThreadCount;
             if (
                         (idle_fiber->getState() != Fiber::TERM)

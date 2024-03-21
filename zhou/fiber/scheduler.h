@@ -135,7 +135,8 @@ private:
 
     // 调度器的主协程： 当使用的线程是一个新的线程时， 新的线程的主协程并不会参与到我们的协程调度中去， 因此我们要专门做一个新的协程去做 schdule
     Fiber::ptr m_rootFiber;     // 只在创建本调度器的线程也需要被调度时才会有值
-    ucontext_t m_exit_ctx;
+    // ucontext_t m_exit_ctx;
+    ucontext_t m_root_fiber_ctx;    // 保存在 m_rootFiber 协程栈上 协程相关的上下文切换信息
 
     // m_fibers 并不见得都是 fiber 对象， 也可能是一个函数
     //      总之，一个协程也不过是一段代码执行逻辑
