@@ -24,7 +24,7 @@ void test2() {
 
 
 int main() {
-    zhou::Scheduler::ptr sc(new zhou::Scheduler(30, 0, "hello"));
+    zhou::Scheduler::ptr sc(new zhou::Scheduler(30, 0, "test"));
     sc->start();
     // 如果不调用 scheduler 则永远不会调用 swapIn 函数
     //      如果调用一次 scheduler 则调用三次 swapIn 函数
@@ -38,14 +38,37 @@ int main() {
     sc->schedule(&test);
     sc->schedule(&test);
     sc->schedule(&test);
+    zhou::Scheduler::ptr sc2(new zhou::Scheduler(30, 0, "hello"));
+    sc2->start();
     sc->schedule(&test);
     sc->schedule(&test);
     sc->schedule(&test);
     sc->schedule(&test);
     sc->schedule(&test);
     
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
+    sc2->schedule(&test);
     sc->schedule(&test2);
     sc->schedule(&test2);
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
+    sc2->schedule([](){ zhou::Mutex::Lock lock(mutex); ZHOU_INFO(g_logger) << "hello world!"; });
     sc->schedule(&test2);
     sc->schedule(&test2);
     sc->schedule(&test2);
@@ -54,5 +77,8 @@ int main() {
     sc->schedule(&test2);
     sc->schedule(&test2);
     sc->stop();
+    
+
+    sc2->stop();
     return 0;
 }

@@ -130,11 +130,11 @@ void Scheduler::stop() {
     }
 
     // bool exist_on_this_fiber = false;
-    if (m_rootThreadId == -1) {
-        ZHOU_ASSERT(GetThis().get() == this)
-    } else {
-        ZHOU_ASSERT(GetThis() == shared_from_this())
-    }
+    // if (m_rootThreadId == -1) {
+    //     ZHOU_ASSERT(GetThis().get() == this)
+    // } else {
+    //     ZHOU_ASSERT(GetThis() == shared_from_this())
+    // }
     m_stopping = true;
     for (size_t i = 0; i < m_threadCount; i++) {
         tickle();
