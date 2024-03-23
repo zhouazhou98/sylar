@@ -9,7 +9,8 @@
 #include <string.h>         // memset
 #include <fcntl.h>          // fcntl
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+// static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
     // static thread_local IOManager::ptr t_io_manager;
@@ -41,10 +42,10 @@ IOManager::IOManager(size_t thread_count, bool use_caller, const std::string & n
 
 // 3. 启动： 创建线程，准备调度执行
     contextResize(32);
-    start();
 }
 
 IOManager::~IOManager() {
+    ZHOU_INFO(g_logger) << "IOManager::~IOManager : use count = " << GetThis().use_count();
     stop();
     close(m_tickleFds[0]);
     close(m_tickleFds[1]);
@@ -103,6 +104,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
                 && !event_ctx.callback);
     
     event_ctx.scheduler = Scheduler::GetThis();
+    ZHOU_INFO(g_logger) << "use count = " << event_ctx.scheduler.use_count();
     if (callback) {
         event_ctx.callback.swap(callback);
     } else {
@@ -253,13 +255,123 @@ IOManager::ptr IOManager::GetThis() {
 // protected
 
 void IOManager::tickle() {
+    if (!m_idleThreadCount) {
+        return;
+    }
+    int rt = write(m_tickleFds[1], "T", 1);
+    ZHOU_ASSERT(rt == 1);       // rt 为实际写入的长度
 }
 
 bool IOManager::stopping() {
-    return true;
+    return Scheduler::stopping()
+            && (m_pendingEventCount == 0);
 }
 
+// 核心的调度操作 （与 Scheduler::run 一起）
+//      按理来说 epoll_wait 会阻塞， 但是我们这里为 epoll 增加了一个 pipe 管道
+//      当我们要让线程继续执行时就使用 tickle 发起写事件， epoll 中对管道监听 读 事件
 void IOManager::idle() {
+    epoll_event * events = new epoll_event[64]();
+    // 自定义 析构函数
+    std::shared_ptr<epoll_event> shared_events(events, [](epoll_event * ptr) {
+        delete [] ptr;
+    });
+
+    while (true) {
+    // 1. 检查是否停止
+        if (stopping()) {
+            ZHOU_INFO(g_logger) << "name = " << getName() << "idle stopping exit";
+            return;
+        }
+
+    // 2. epoll_wait 超时时间设置， 陷入 epoll_wait 等待事件
+        uint64_t next_timeout = 0;
+        int rt = 0;
+        
+        do {
+            static const int MAX_TIMEOUT = 3000;
+            if (next_timeout != ~0ull) {
+                next_timeout = (int)next_timeout > MAX_TIMEOUT 
+                                    ? MAX_TIMEOUT : next_timeout;
+            } else {
+                next_timeout = MAX_TIMEOUT;
+            }
+
+            // rt > 0 : 准备好的事件
+            rt = epoll_wait(m_epfd, events, 64, (int)next_timeout);
+            if (rt < 0 && errno == EINTR) {
+            } else {
+                break;
+            }
+        } while (true);
+
+    // 3. 调度执行: pipe 管道; socket IO 事件
+        for (int i = 0; i < rt; i++) {
+            epoll_event & event = events[i];
+
+        // 3.1 pipe 管道读事件
+            if (event.data.fd == m_tickleFds[0]) {
+                uint8_t dummy;
+                while (read(m_tickleFds[0], &dummy, 1) == 1);
+                continue;
+            }
+
+        // 3.2 IO 事件
+            // 3.2.1 检查触发事件
+            FdCtx * fd_ctx = (FdCtx *)event.data.ptr;
+            FdCtx::MutexType::Lock lock(fd_ctx->mutex);
+            if (event.events & (EPOLLERR | EPOLLHUP)) {
+                event.events |= EPOLLIN | EPOLLOUT;
+            }
+            int real_events = NONE;
+            if (event.events & EPOLLIN) {
+                real_events |= READ;
+            }
+            if (event.events & EPOLLOUT) {
+                real_events |= WRITE;
+            }
+
+            // 3.2.2 如果没有触发的事件则执行下一个
+            if ( (fd_ctx->events & real_events) == NONE ) {
+                continue;
+            }
+
+            // 3.2.3 设置剩下的事件 并继续将其加入到 epoll 中
+            //      修改 fd 对应的事件， 或 删除 fd 对应的事件
+            int left_events = (fd_ctx->events & ~real_events);
+            int op = left_events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+            event.events = EPOLLET | left_events;
+
+            int rt2 = epoll_ctl(m_epfd, op, fd_ctx->fd, &event);
+            if(rt2) {
+                ZHOU_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                    << op << "," << fd_ctx->fd << "," << event.events << "):"
+                    << rt2 << " (" << errno << ") (" << strerror(errno) << ")";
+                continue;
+            }
+
+            // 3.2.4 触发对应的事件
+            if(real_events & READ) {
+                fd_ctx->triggerEvent(READ);
+                --m_pendingEventCount;
+            }
+            if(real_events & WRITE) {
+                fd_ctx->triggerEvent(WRITE);
+                --m_pendingEventCount;
+            }
+        }
+
+        // 对应于 Scheduler::MainFunc 在调用 callback() 后的处理
+        //  Fiber::ptr cur = Fiber::GetThis();
+        //  auto raw_ptr = cur.get();
+        //  cur.reset();
+
+        //  raw_ptr->swapOut();
+
+        Fiber::GetThis().get()->swapOut();
+
+    }
+
 }
 
 // bool IOManager::stopping(uint64_t & time_out) {
