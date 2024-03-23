@@ -36,7 +36,7 @@ protected:
     bool stopping() override;
     void idle() override;
 
-    bool stopping(uint64_t & time_out);
+    // bool stopping(uint64_t & time_out);
     void contextResize(size_t size);
 
 private:

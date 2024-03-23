@@ -262,9 +262,9 @@ bool IOManager::stopping() {
 void IOManager::idle() {
 }
 
-bool IOManager::stopping(uint64_t & time_out) {
-    return true;
-}
+// bool IOManager::stopping(uint64_t & time_out) {
+//     return true;
+// }
 
 void IOManager::contextResize(size_t size) {
     m_fdCtxs.resize(size);
