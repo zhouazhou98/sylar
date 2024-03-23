@@ -84,7 +84,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
     int op = fd_ctx->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
     epoll_event ep_event;
     ep_event.events = EPOLLET | fd_ctx->events | event;
-    ep_event.data.ptr = &*fd_ctx;
+    ep_event.data.ptr = fd_ctx.get();
 
     int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
     if (rt) {
@@ -114,14 +114,132 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
 }
 
 bool IOManager::delEvent(int fd, Event event) {
+// 1. 从 m_fdCtxs 中取出 fd_ctx
+    FdCtx::ptr fd_ctx;
+    {
+    RWMutexType::ReadLock lock(m_mutex);
+        if ((int)m_fdCtxs.size() <= fd) {
+            return false;
+        }
+        fd_ctx = m_fdCtxs[fd];
+    }
+// 2. 将相应的文件句柄对应事件从 m_epfd 上摘下来
+//  2.1 只对 fd 监听了 event 事件， 则删除
+//  2.2 对 fd 还监听了其它 event 事件， 则修改
+    FdCtx::MutexType::Lock lock2(fd_ctx->mutex);
+    // 该 fd 对应的事件应该在监听事件中
+    if (!(fd_ctx->events & event)) {
+        return false;
+    }
+
+    Event new_event = (Event)(fd_ctx->events & ~event);
+    int op = new_event ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+    epoll_event ep_event;
+    ep_event.events = EPOLLET | new_event;
+    ep_event.data.ptr = fd_ctx.get();
+
+    int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
+    if(rt) {
+        ZHOU_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+            << op << "," << fd << "," << ep_event.events << "):"
+            << rt << " (" << errno << ") (" << strerror(errno) << ")";
+        return false;
+    }
+
+// 3. 重置 fd 对应需要删除的 event 事件 上下文
+    --m_pendingEventCount;
+    fd_ctx->events = new_event;
+    FdCtx::EventCtx & event_ctx = fd_ctx->getContext(event);
+    fd_ctx->resetContext(event_ctx);
+
     return true;
 }
 
 bool IOManager::cancelEvent(int fd, Event event) {
+// 1. 从 m_fdCtxs 中取出 fd_ctx
+    FdCtx::ptr fd_ctx;
+    {
+    RWMutexType::ReadLock lock(m_mutex);
+        if ((int)m_fdCtxs.size() <= fd) {
+            return false;
+        }
+        fd_ctx = m_fdCtxs[fd];
+    }
+
+// 2. 将相应的文件句柄对应事件从 m_epfd 上摘下来
+//  2.1 只对 fd 监听了 event 事件， 则删除
+//  2.2 对 fd 还监听了其它 event 事件， 则修改
+    FdCtx::MutexType::Lock lock2(fd_ctx->mutex);
+    // 该 fd 对应的事件应该在监听事件中
+    if (!(fd_ctx->events & event)) {
+        return false;
+    }
+
+    Event new_event = (Event)(fd_ctx->events & ~event);
+    int op = new_event ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+    epoll_event ep_event;
+    ep_event.events = EPOLLET | new_event;
+    ep_event.data.ptr = fd_ctx.get();
+
+    int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
+    if(rt) {
+        ZHOU_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+            << op << "," << fd << "," << ep_event.events << "):"
+            << rt << " (" << errno << ") (" << strerror(errno) << ")";
+        return false;
+    }
+
+// 3. 触发事件
+    
+    fd_ctx->triggerEvent(event);
+    --m_pendingEventCount;
     return true;
 }
 
 bool IOManager::cancelAll(int fd) {
+// 1. 从 m_fdCtxs 中取出 fd_ctx
+    FdCtx::ptr fd_ctx;
+    {
+    RWMutexType::ReadLock lock(m_mutex);
+        if ((int)m_fdCtxs.size() <= fd) {
+            return false;
+        }
+        fd_ctx = m_fdCtxs[fd];
+    }
+// 2. 将相应的文件句柄对应事件从 m_epfd 上摘下来
+//  2.1 只对 fd 监听了 event 事件， 则删除
+//  2.2 对 fd 还监听了其它 event 事件， 则修改
+    FdCtx::MutexType::Lock lock2(fd_ctx->mutex);
+    // 该 fd 对应的事件应该在监听事件中
+    if (!fd_ctx->events) {
+        return false;
+    }
+
+    int op = EPOLL_CTL_MOD;
+    epoll_event ep_event;
+    ep_event.events = 0;
+    ep_event.data.ptr = fd_ctx.get();
+
+    int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
+    if(rt) {
+        ZHOU_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+            << op << "," << fd << "," << ep_event.events << "):"
+            << rt << " (" << errno << ") (" << strerror(errno) << ")";
+        return false;
+    }
+
+// 3. 删除前先触发事件
+    if(fd_ctx->events & READ) {
+        fd_ctx->triggerEvent(READ);
+        --m_pendingEventCount;
+    }
+    if(fd_ctx->events & WRITE) {
+        fd_ctx->triggerEvent(WRITE);
+        --m_pendingEventCount;
+    }
+
+    ZHOU_ASSERT(fd_ctx->events == 0);
+
     return true;
 }
 
@@ -129,7 +247,7 @@ bool IOManager::cancelAll(int fd) {
 
 IOManager::ptr IOManager::GetThis() {
     return std::dynamic_pointer_cast<IOManager>(Scheduler::GetThis());
-    // return (IOManager::ptr)((IOManager *)&*(Scheduler::GetThis()));
+    // return (IOManager::ptr)( (IOManager *)Scheduler::GetThis().get() );
 }
 
 // protected
