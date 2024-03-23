@@ -33,7 +33,8 @@ set(LIB_SRC
     # zhou/thread/lock.cc                   # 互斥
     zhou/fiber/fiber.cc                 # 协程模块
     zhou/fiber/stack_allocator.cc           # 协程栈分配器
-    zhou/fiber/scheduler.cc             # 协程调度器（线程池）
+    zhou/fiber/scheduler.cc                 # 协程调度器（线程池）
+    zhou/fiber/iomanager.cc                 # IO 协程调度器 - 协程 + epoll 配合
     )
 
 

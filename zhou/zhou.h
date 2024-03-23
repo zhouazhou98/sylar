@@ -16,5 +16,6 @@
 #include "fiber/fiber.h"            // 协程： ucontext_t 封装
 #include "fiber/stack_allocator.h"  // 协程栈内存分配： 这里暂时用的 malloc 分配到堆上
 #include "fiber/scheduler.h"        // 协程调度器
+#include "fiber/iomanager.h"        // IO 协程调度器 （epoll）
 
 #endif // ! __ZHOU_H__
