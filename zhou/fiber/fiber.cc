@@ -6,7 +6,7 @@
 #include "fiber.h"
 #include <atomic>
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
 namespace zhou {
 

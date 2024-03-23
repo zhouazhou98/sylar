@@ -13,10 +13,8 @@ void test_fiber() {
 
 
 void test() {
-    zhou::IOManager::ptr iom(new zhou::IOManager);
-    ZHOU_INFO(g_logger) << "use count = " << iom.use_count();
+    zhou::IOManager::ptr iom(new zhou::IOManager(2, false));
     iom->start();
-    ZHOU_INFO(g_logger) << "use count = " << iom.use_count();
 
 
     // iom->schedule(&test_fiber);
@@ -36,22 +34,15 @@ void test() {
     addr.sin_port = htons(7890);
     inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr.s_addr);
 
-    // zhou::IOManager::GetThis()->addEvent(sock_fd, zhou::IOManager::READ, [](){
-    //         ZHOU_INFO(g_logger) << "write callback";
-    //     });
-    // ZHOU_INFO(g_logger) << "use count = " << iom.use_count();
-    zhou::IOManager::GetThis()->addEvent(sock_fd, zhou::IOManager::WRITE, [](){
-            ZHOU_INFO(g_logger) << "write callback";
+    zhou::IOManager::GetThis()->addEvent(sock_fd, zhou::IOManager::READ, [](){
+            ZHOU_INFO(g_logger) << "read callback";
         });
-    int rt = connect(sock_fd, (const sockaddr *)&addr, sizeof(addr));
-    if (!rt) {
-
-    }
-
-    ZHOU_INFO(g_logger) << "use count = " << iom.use_count();
-    // ZHOU_INFO(g_logger) << "IOManager root fiber use count: " << zhou::Scheduler::GetThis
+    zhou::IOManager::GetThis()->addEvent(sock_fd, zhou::IOManager::WRITE, [sock_fd](){
+            ZHOU_INFO(g_logger) << "write callback";
+            zhou::IOManager::GetThis()->cancelEvent(sock_fd, zhou::IOManager::READ);
+        });
+    /* int rt = */ connect(sock_fd, (const sockaddr *)&addr, sizeof(addr));
     iom->stop();
-    ZHOU_INFO(g_logger) << "use count = " << iom.use_count();
 }
 
 int main() {

@@ -9,8 +9,8 @@
 #include <string.h>         // memset
 #include <fcntl.h>          // fcntl
 
-// static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+// static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
     // static thread_local IOManager::ptr t_io_manager;
@@ -45,7 +45,7 @@ IOManager::IOManager(size_t thread_count, bool use_caller, const std::string & n
 }
 
 IOManager::~IOManager() {
-    stop();
+    // stop();
     close(m_tickleFds[0]);
     close(m_tickleFds[1]);
     close(m_epfd);
@@ -103,7 +103,6 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
                 && !event_ctx.callback);
     
     event_ctx.scheduler = Scheduler::GetThis();
-    ZHOU_INFO(g_logger) << "use count = " << event_ctx.scheduler.use_count();
     if (callback) {
         event_ctx.callback.swap(callback);
     } else {
