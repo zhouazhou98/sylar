@@ -51,7 +51,7 @@ IOManager::~IOManager() {
     close(m_epfd);
 }
 
-// 1: success; 0: retry; -1: error
+// 0: success; -1: error
 int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
 // 1. 从容器 m_fdCtxs 中取出 fd 对应的智能指针
 //  1.1 m_fdCtxs[fd] 指向的 FdCtx 只是初始化了，没有任何内容

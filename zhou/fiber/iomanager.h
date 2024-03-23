@@ -22,7 +22,7 @@ public:
     IOManager(size_t thread_count = 1, bool use_caller = true, const std::string & name = "");
     ~IOManager();
 
-    // 1: success; 0: retry; -1: error
+    // 0: success; -1: error
     int addEvent(int fd, Event event, std::function<void()> callback = nullptr);
     bool delEvent(int fd, Event event);
     bool cancelEvent(int fd, Event event);
