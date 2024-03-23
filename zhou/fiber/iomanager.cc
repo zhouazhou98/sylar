@@ -45,7 +45,6 @@ IOManager::IOManager(size_t thread_count, bool use_caller, const std::string & n
 }
 
 IOManager::~IOManager() {
-    ZHOU_INFO(g_logger) << "IOManager::~IOManager : use count = " << GetThis().use_count();
     stop();
     close(m_tickleFds[0]);
     close(m_tickleFds[1]);
@@ -97,7 +96,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
 
     // 2.3 设置事件触发回调函数
     ++m_pendingEventCount;
-    fd_ctx->events = (Event)(fd_ctx->events | event);
+    fd_ctx->events = (Event)(fd_ctx->events | event | EPOLLET);
     FdCtx::EventCtx & event_ctx = fd_ctx->getContext(event);
     ZHOU_ASSERT(!event_ctx.scheduler
                 && !event_ctx.fiber
@@ -247,10 +246,25 @@ bool IOManager::cancelAll(int fd) {
 
 // static 
 
-IOManager::ptr IOManager::GetThis() {
-    return std::dynamic_pointer_cast<IOManager>(Scheduler::GetThis());
+IOManager * IOManager::GetThis() {
+    return (IOManager *)Scheduler::GetThis().get();
+    // return std::dynamic_pointer_cast<IOManager>(Scheduler::GetThis());
     // return (IOManager::ptr)( (IOManager *)Scheduler::GetThis().get() );
 }
+
+// void IOManager::stop() {
+//     Scheduler::stop();
+//     for (size_t i = 0; i < m_fdCtxs.size(); i++) {
+//         if (m_fdCtxs[i]->read_ctx.scheduler) {
+//             m_fdCtxs[i]->read_ctx.scheduler.reset();
+//         } 
+//         if (m_fdCtxs[i]->write_ctx.scheduler) {
+//             m_fdCtxs[i]->write_ctx.scheduler.reset();
+//         }
+//     }
+// 
+// 
+// }
 
 // protected
 

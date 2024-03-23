@@ -15,7 +15,7 @@ public:
     enum Event {
         NONE = 0x0,
         READ = 0x1,
-        WRITE = 0x2,
+        WRITE = 0x4,
     };
 
 public:
@@ -29,7 +29,8 @@ public:
     bool cancelAll(int fd);
 
 public:
-    static IOManager::ptr GetThis();
+    static IOManager * GetThis();
+    // void stop();
 
 protected:
     void tickle() override;
