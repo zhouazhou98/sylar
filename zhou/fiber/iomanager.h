@@ -46,7 +46,7 @@ private:
         typedef std::shared_ptr<FdCtx> ptr;
 
         struct EventCtx {
-            Scheduler * scheduler;              // 在哪个 Scheduler 上执行，被哪个 Scheduler 调度处理
+            Scheduler::ptr scheduler;              // 在哪个 Scheduler 上执行，被哪个 Scheduler 调度处理
             Fiber::ptr fiber;                   // IO 事件的协程
             std::function<void()> callback;     // IO 事件的回调
         };

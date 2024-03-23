@@ -35,6 +35,7 @@ set(LIB_SRC
     zhou/fiber/stack_allocator.cc           # 协程栈分配器
     zhou/fiber/scheduler.cc                 # 协程调度器（线程池）
     zhou/fiber/iomanager.cc                 # IO 协程调度器 - 协程 + epoll 配合
+    zhou/fiber/iomanager_fd_ctx.cc          # IO 协程调度器 - event 上下文
     )
 
 

@@ -53,6 +53,9 @@ IOManager::~IOManager() {
 
 // 1: success; 0: retry; -1: error
 int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
+// 1. 从容器 m_fdCtxs 中取出 fd 对应的智能指针
+//  1.1 m_fdCtxs[fd] 指向的 FdCtx 只是初始化了，没有任何内容
+//  1.2 m_fdCtxs[fd] 指向的 FdCtx 已经在初始化后修改过了，比如对该 fd 添加了事件等
     FdCtx::ptr fd_ctx;
     {
         RWMutexType::ReadLock lock(m_mutex);
@@ -66,11 +69,46 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
         }
     }
 
+// 2. 为 fd_ctx 添加 event 事件，并将其添加到 m_epfd 中去
     FdCtx::MutexType::Lock lock(fd_ctx->mutex);
-    // 如果 fd_ctx 中已经监听了 event 事件， 则这次添加是有问题的
+    // 2.1 如果 fd_ctx 中已经监听了 event 事件， 则这次添加是有问题的
+    //  这里是针对 1.2 中已经对该 fd 添加过事件，这里又重新添加该事件的处理
     if (fd_ctx->events & event) {
-        ZHOU_ERROR(g_logger) << "";
+        ZHOU_ERROR(g_logger) << "addEvent assert fd=" << fd
+            << " event=" << event
+            << " fd_ctx.event=" << fd_ctx->events;
+        ZHOU_ASSERT(!(fd_ctx->events & event));
+    }
 
+    // 2.2 将 fd, event 添加到 m_epfd 中
+    int op = fd_ctx->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
+    epoll_event ep_event;
+    ep_event.events = EPOLLET | fd_ctx->events | event;
+    ep_event.data.ptr = &*fd_ctx;
+
+    int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
+    if (rt) {
+        ZHOU_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+            << op << "," << fd << "," << ep_event.events << "):"
+            << rt << " (" << errno << ") (" << strerror(errno) << ")";
+        return -1;
+    }
+
+    // 2.3 设置事件触发回调函数
+    ++m_pendingEventCount;
+    fd_ctx->events = (Event)(fd_ctx->events | event);
+    FdCtx::EventCtx & event_ctx = fd_ctx->getContext(event);
+    ZHOU_ASSERT(!event_ctx.scheduler
+                && !event_ctx.fiber
+                && !event_ctx.callback);
+    
+    event_ctx.scheduler = Scheduler::GetThis();
+    if (callback) {
+        event_ctx.callback.swap(callback);
+    } else {
+        event_ctx.fiber = Fiber::GetThis();
+        ZHOU_ASSERT2(event_ctx.fiber->getState() == Fiber::EXEC,
+                        "state = " << event_ctx.fiber->getState());
     }
     return 0;
 }
