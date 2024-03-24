@@ -42,11 +42,12 @@ IOManager::IOManager(size_t thread_count, bool use_caller, const std::string & n
 
 // 3. 启动： 创建线程，准备调度执行
     contextResize(32);
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
 }
 
 IOManager::~IOManager() {
     ZHOU_INFO(g_logger) << "IOManager::~IOManager : use count = " << GetThis().use_count();
-    stop();
+    // stop();
     close(m_tickleFds[0]);
     close(m_tickleFds[1]);
     close(m_epfd);
@@ -54,6 +55,9 @@ IOManager::~IOManager() {
 
 // 0: success; -1: error
 int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
+                {
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
+                }
 // 1. 从容器 m_fdCtxs 中取出 fd 对应的智能指针
 //  1.1 m_fdCtxs[fd] 指向的 FdCtx 只是初始化了，没有任何内容
 //  1.2 m_fdCtxs[fd] 指向的 FdCtx 已经在初始化后修改过了，比如对该 fd 添加了事件等
@@ -70,6 +74,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
         }
     }
 
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
 // 2. 为 fd_ctx 添加 event 事件，并将其添加到 m_epfd 中去
     FdCtx::MutexType::Lock lock(fd_ctx->mutex);
     // 2.1 如果 fd_ctx 中已经监听了 event 事件， 则这次添加是有问题的
@@ -81,6 +86,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
         ZHOU_ASSERT(!(fd_ctx->events & event));
     }
 
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
     // 2.2 将 fd, event 添加到 m_epfd 中
     int op = fd_ctx->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
     epoll_event ep_event;
@@ -103,8 +109,11 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
                 && !event_ctx.fiber
                 && !event_ctx.callback);
     
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
     event_ctx.scheduler = Scheduler::GetThis();
-    ZHOU_INFO(g_logger) << "use count = " << event_ctx.scheduler.use_count();
+    {
+    ZHOU_INFO(g_logger) << "use count = " << Scheduler::GetMainFiber().use_count();
+    }
     if (callback) {
         event_ctx.callback.swap(callback);
     } else {
@@ -112,6 +121,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> callback) {
         ZHOU_ASSERT2(event_ctx.fiber->getState() == Fiber::EXEC,
                         "state = " << event_ctx.fiber->getState());
     }
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
     return 0;
 }
 
@@ -249,7 +259,7 @@ bool IOManager::cancelAll(int fd) {
 
 IOManager::ptr IOManager::GetThis() {
     return std::dynamic_pointer_cast<IOManager>(Scheduler::GetThis());
-    // return (IOManager::ptr)( (IOManager *)Scheduler::GetThis().get() );
+    // return (IOManager::ptr)( (IOManager *)Scheduler::GetMainFiber().get() );
 }
 
 // protected
@@ -263,6 +273,9 @@ void IOManager::tickle() {
 }
 
 bool IOManager::stopping() {
+        ZHOU_INFO(g_logger) << "Scheduler::stopping() && m_pendingEventCount : "
+                        << Scheduler::stopping() << " && "
+                        << m_pendingEventCount;
     return Scheduler::stopping()
             && (m_pendingEventCount == 0);
 }
@@ -271,6 +284,7 @@ bool IOManager::stopping() {
 //      按理来说 epoll_wait 会阻塞， 但是我们这里为 epoll 增加了一个 pipe 管道
 //      当我们要让线程继续执行时就使用 tickle 发起写事件， epoll 中对管道监听 读 事件
 void IOManager::idle() {
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
     epoll_event * events = new epoll_event[64]();
     // 自定义 析构函数
     std::shared_ptr<epoll_event> shared_events(events, [](epoll_event * ptr) {
@@ -280,7 +294,7 @@ void IOManager::idle() {
     while (true) {
     // 1. 检查是否停止
         if (stopping()) {
-            ZHOU_INFO(g_logger) << "name = " << getName() << "idle stopping exit";
+            ZHOU_INFO(g_logger) << "name = [" << getName() << "] idle stopping exit";
             return;
         }
 
@@ -304,6 +318,7 @@ void IOManager::idle() {
                 break;
             }
         } while (true);
+        ZHOU_INFO(g_logger) << "main function: IOManager::ptr use count = " << zhou::Scheduler::GetMainFiber().use_count();
 
     // 3. 调度执行: pipe 管道; socket IO 事件
         for (int i = 0; i < rt; i++) {
@@ -356,7 +371,11 @@ void IOManager::idle() {
                 --m_pendingEventCount;
             }
             if(real_events & WRITE) {
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
+                ZHOU_INFO(g_logger) << "fd_ctx->write_event.scheduler = " << fd_ctx->write_ctx.scheduler;
                 fd_ctx->triggerEvent(WRITE);
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
+                ZHOU_INFO(g_logger) << "fd_ctx->write_event.scheduler = " << fd_ctx->write_ctx.scheduler;
                 --m_pendingEventCount;
             }
         }
@@ -368,11 +387,18 @@ void IOManager::idle() {
 
         //  raw_ptr->swapOut();
 
-        Fiber::GetThis().get()->swapOut();
+        Fiber::GetThis().get()->YeildToHold();
 
     }
 
 }
+
+// void IOManager::stop() {
+//     Scheduler::stop();
+//     for (size_t i = 0; i < m_fdCtxs.size(); i++ ) {
+//     }
+// }
+
 
 // bool IOManager::stopping(uint64_t & time_out) {
 //     return true;

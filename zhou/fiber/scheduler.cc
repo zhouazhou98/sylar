@@ -5,7 +5,7 @@
 #include "zhou/utils/macro.h"
 
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
 
@@ -24,6 +24,7 @@ Scheduler::Scheduler(int thread_count, bool use_caller, const std::string & name
         Fiber::GetThis();
         thread_count = thread_count - 1;
 
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
         // 说明当前线程还没有创建过 协程调度器 Scheduler
         ZHOU_ASSERT(GetThis() == nullptr);
 // t_scheduler = shared_from_this();
@@ -33,6 +34,7 @@ Scheduler::Scheduler(int thread_count, bool use_caller, const std::string & name
                                     &Scheduler::run, this
                                 )
                         ));
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
         Thread::SetName(m_name);
 
         // 将当前线程放入线程池中， 后续会参与调度（被调度）
@@ -42,6 +44,7 @@ Scheduler::Scheduler(int thread_count, bool use_caller, const std::string & name
     } else {
         m_rootThreadId = -1;
     }
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
 
     m_threadCount = thread_count;
 
@@ -143,18 +146,21 @@ void Scheduler::stop() {
         tickle();
     }
 
+    ZHOU_INFO(g_logger) << t_scheduler.use_count();
     if (m_rootFiber) {
         if (!stopping()) {
             // 按理来说主线程在 run 方法执行结束后应该回到这里
             // m_rootFiber->swapIn(&m_exit_ctx);
             m_rootFiber->swapIn();
             // m_rootFiber->call();
+    ZHOU_INFO(g_logger) << t_scheduler.use_count();
         }
     }
 
     for (auto iter = m_threads.begin(); iter != m_threads.end(); iter++) {
         (*iter)->join();
     }
+    ZHOU_INFO(g_logger) << t_scheduler.use_count();
 }
 
 
@@ -162,6 +168,7 @@ void Scheduler::stop() {
 // 所有由调度器创建的线程， 其执行的都是该方法
 //      while 循环： 让所有的线程一直运行， 直到调度器给出命令让他们退出后， 它们才可以跳出循环
 void Scheduler::run() {
+                ZHOU_INFO(g_logger) << "use count = " << zhou::Scheduler::GetMainFiber().use_count();
     ucontext_t * root_fiber_ctx = nullptr;
     if (m_rootFiber == Fiber::GetThis()) {
         root_fiber_ctx = &m_root_fiber_ctx;

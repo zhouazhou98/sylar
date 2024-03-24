@@ -33,7 +33,7 @@ public:
     static Fiber::ptr GetMainFiber();
 
     void start();
-    void stop();
+    virtual void stop();
 
     template <class FiberOrCallback>
     void schedule(FiberOrCallback fc, int thread_id = -1) {

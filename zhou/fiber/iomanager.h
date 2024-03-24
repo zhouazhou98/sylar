@@ -15,7 +15,7 @@ public:
     enum Event {
         NONE = 0x0,
         READ = 0x1,
-        WRITE = 0x2,
+        WRITE = 0x4,
     };
 
 public:
@@ -30,6 +30,8 @@ public:
 
 public:
     static IOManager::ptr GetThis();
+public:
+    // void stop();
 
 protected:
     void tickle() override;
