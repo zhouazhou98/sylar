@@ -36,6 +36,10 @@ set(LIB_SRC
     zhou/fiber/scheduler.cc                 # 协程调度器（线程池）
     zhou/fiber/iomanager.cc                 # IO 协程调度器 - 协程 + epoll 配合
     zhou/fiber/iomanager_fd_ctx.cc          # IO 协程调度器 - event 上下文
+    zhou/fiber/iomanager_timer.cc
+    zhou/timer/timer.cc                 # 定时器
+    zhou/timer/timer_manager.cc             # 定时器管理器
+
     )
 
 
@@ -154,6 +158,16 @@ target_link_libraries(${TEST_EXEC} zhou)
 
 # 生成测试文件 test                    
 set(TEST_EXEC test_iomanager)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_timer)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      

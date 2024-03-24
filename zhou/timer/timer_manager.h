@@ -45,7 +45,7 @@ protected:
     void addTimer(Timer::ptr val, RWMutexType::WriteLock& lock);
 
     // 当有新的定时器插入到定时器的首部，执行该函数
-    virtual void onTimeInsertedAtFront();
+    virtual void onTimerInsertedAtFront() = 0;
 
 private:
     // 检测服务器时间是否被调后了

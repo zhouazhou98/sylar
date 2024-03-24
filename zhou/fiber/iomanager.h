@@ -3,11 +3,12 @@
 
 #include "scheduler.h"
 #include "zhou/thread/rwlock.h"
+#include "zhou/timer/timer_manager.h"
 #include <memory>
 
 namespace zhou { // __ZHOU_IOMANAGER_H__
 
-class IOManager : public Scheduler {
+class IOManager : public Scheduler, public TimerManager {
 public:
     typedef std::shared_ptr<IOManager> ptr;
     typedef RWMutex RWMutexType;
@@ -39,6 +40,9 @@ protected:
 
     // bool stopping(uint64_t & time_out);
     void contextResize(size_t size);
+
+    // 当有新的定时器插入到定时器的首部，执行该函数
+    void onTimerInsertedAtFront() override;
 
 private:
     // 在 epoll 中增加事件是根据一个个 fd 来判断的
