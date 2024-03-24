@@ -276,8 +276,8 @@ void IOManager::tickle() {
 }
 
 bool IOManager::stopping() {
-    return Scheduler::stopping()
-            && (m_pendingEventCount == 0);
+    uint64_t timeout = 0;
+    return stopping(timeout);
 }
 
 // 核心的调度操作 （与 Scheduler::run 一起）
@@ -292,13 +292,13 @@ void IOManager::idle() {
 
     while (true) {
     // 1. 检查是否停止
-        if (stopping()) {
+        uint64_t next_timeout = 0;
+        if (stopping(next_timeout)) {
             ZHOU_INFO(g_logger) << "name = " << getName() << "idle stopping exit";
             return;
         }
 
     // 2. epoll_wait 超时时间设置， 陷入 epoll_wait 等待事件
-        uint64_t next_timeout = 0;
         int rt = 0;
         
         do {
@@ -318,7 +318,15 @@ void IOManager::idle() {
             }
         } while (true);
 
-    // 3. 调度执行: pipe 管道; socket IO 事件
+    // 3. 
+        std::vector<std::function<void()>> callbacks;
+        listExpiredCallback(callbacks);
+        if (!callbacks.empty()) {
+            scheduleIters(callbacks.begin(), callbacks.end());
+            callbacks.clear();
+        }
+
+    // 4. 调度执行: pipe 管道; socket IO 事件
         for (int i = 0; i < rt; i++) {
             epoll_event & event = events[i];
 

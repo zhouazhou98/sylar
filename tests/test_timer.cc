@@ -5,7 +5,7 @@ static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->ge
 zhou::Timer::ptr s_timer;
 
 void test_timer() {
-    zhou::IOManager::ptr iom(new zhou::IOManager(2, false));
+    zhou::IOManager::ptr iom(new zhou::IOManager(2, true));
     iom->start();
     s_timer = iom->addTimer(1000, [](){
         static int i = 0;

@@ -44,6 +44,8 @@ protected:
     // 当有新的定时器插入到定时器的首部，执行该函数
     void onTimerInsertedAtFront() override;
 
+    bool stopping(uint64_t & timeout);
+
 private:
     // 在 epoll 中增加事件是根据一个个 fd 来判断的
     struct FdCtx {

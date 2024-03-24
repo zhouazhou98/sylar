@@ -56,7 +56,8 @@ public:
             MutexType::Lock lock(m_mutex);
             while (begin != end) {
                 // 这里 &*begin 是指针， 在 scheduleNoLock 中会在堆上创建一个 FiberAndFunc 类型， 其调用的是含有二级指针的初始化函数， 即会 swap 掉这里的 begin
-                need_tickle = scheduleNoLock(&*begin++) || need_tickle;
+                need_tickle = scheduleNoLock(&*begin, -1) || need_tickle;
+                begin++;
                 // 到了这里， 这个 begin 已经被 swap 掉了， 不能再继续对 begin 进行操作
                 //      而对于这个函数来说， 作为实参传进来的 begin 在调用该函数的作用域中也不能用了
             }
