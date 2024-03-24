@@ -18,6 +18,7 @@ uint32_t GetFiberId() {
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "zhou/zhou.h"
 
 namespace zhou {
@@ -54,6 +55,29 @@ std::string BacktraceToString(int size, int skip, const std::string & prefix) {
     return ss.str();
 }
 
+
+
+
+// 获取当前毫秒数
+uint64_t GetCurrentMS() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    // struct timeval { 
+    // time_t       tv_sec;     秒      * 1000 ul   = 毫秒
+    // suseconds_t  tv_usec;    微妙    / 1000 ul    = 毫秒
+    // };
+    return tv.tv_sec * 1000ul + tv.tv_usec / 1000;
+}
+// 获取当前微妙数
+uint64_t GetCurrentUS() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    // struct timeval { 
+    // time_t       tv_sec;     秒      * 1000 ul   = 毫秒
+    // suseconds_t  tv_usec;    微妙    / 1000 ul    = 毫秒
+    // };
+    return tv.tv_sec * 1000ul * 1000ul + tv.tv_usec;
+}
 
 
 }

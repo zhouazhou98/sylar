@@ -18,4 +18,7 @@
 #include "fiber/scheduler.h"        // 协程调度器
 #include "fiber/iomanager.h"        // IO 协程调度器 （epoll）
 
+#include "timer/timer.h"            // Timer
+#include "timer/timer_manager.h"    // Timer Manager
+
 #endif // ! __ZHOU_H__
