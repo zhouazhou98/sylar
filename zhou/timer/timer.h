@@ -16,7 +16,7 @@ public:
     typedef std::shared_ptr<Timer> ptr;
 
     // 取消定时器
-    bool cancel();
+    bool cancel(bool cancel_callback = true);
     // 刷新设置定时器的执行时间
     bool refresh();
     // 重置定时器时间

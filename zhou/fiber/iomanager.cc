@@ -291,8 +291,9 @@ void IOManager::idle() {
     });
 
     while (true) {
-    // 1. 检查是否停止
         uint64_t next_timeout = 0;
+    // 1. 检查是否停止
+        // stopping 中获取下一个回调函数调用距离现在的时间
         if (stopping(next_timeout)) {
             ZHOU_INFO(g_logger) << "name = " << getName() << "idle stopping exit";
             return;
@@ -318,11 +319,14 @@ void IOManager::idle() {
             }
         } while (true);
 
-    // 3. 
+    // 3. schedule 所有的回调函数
         std::vector<std::function<void()>> callbacks;
         listExpiredCallback(callbacks);
         if (!callbacks.empty()) {
-            scheduleIters(callbacks.begin(), callbacks.end());
+            for (auto i : callbacks) {
+                schedule(i);
+            }
+            // scheduleIters(callbacks.begin(), callbacks.end());
             callbacks.clear();
         }
 

@@ -45,12 +45,14 @@ Timer::Timer(uint64_t next) : m_next(next) {
 
 // 取消定时器
 //  从 定时器管理器 集合中找到当前定时器并将其从集合中删除
-bool Timer::cancel() {
+bool Timer::cancel(bool cancel_callback) {
     TimerManager::RWMutexType::WriteLock lock(m_manager->m_mutex);
     if (!m_callback) {
         return false;
     }
-    m_callback = nullptr;
+    if (cancel_callback) {
+        m_callback = nullptr;
+    }
     auto iter = m_manager->m_timers.find(shared_from_this());
     if (iter == m_manager->m_timers.end()) {
         return false;
@@ -69,7 +71,7 @@ bool Timer::refresh() {
     // } 
     // m_manager->m_timers.erase(iter);
 
-    if (!cancel()) {
+    if (!cancel(0)) {
         return false;
     }
 
@@ -80,7 +82,7 @@ bool Timer::refresh() {
 }
 // 重置定时器时间
 bool Timer::reset(uint64_t ms, bool from_now) {
-    if (!cancel()) {
+    if (!cancel(0)) {
         return false;
     }
 
