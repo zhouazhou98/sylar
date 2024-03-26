@@ -21,4 +21,6 @@
 #include "timer/timer.h"            // Timer
 #include "timer/timer_manager.h"    // Timer Manager
 
+#include "hook/hook.h"
+
 #endif // ! __ZHOU_H__
