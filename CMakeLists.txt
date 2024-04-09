@@ -41,7 +41,10 @@ set(LIB_SRC
     zhou/timer/timer_manager.cc             # 定时器管理器
     zhou/hook/hook.cc
     zhou/hook/sleep.cc
-
+    zhou/net/address.cc
+    zhou/net/ipv4_address.cc
+    zhou/net/ipv6_address.cc
+    zhou/net/unix_address.cc
     )
 
 
