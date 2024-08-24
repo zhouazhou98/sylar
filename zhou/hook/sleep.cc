@@ -19,8 +19,10 @@ extern "C" {
 
 
 // 1. -------------- sleep --------------
+// 使用 IOManager 来实现 epoll 超时调用
 // 1.1 sleep 毫秒
 unsigned int sleep(unsigned int seconds) {
+
     ZHOU_INFO(g_logger) << "sleep hook";
     return 0;
 }

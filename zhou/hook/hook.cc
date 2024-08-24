@@ -2,9 +2,10 @@
 #include "zhou/log/log.h"
 #include "zhou/log/log_manager.h"
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
 namespace zhou {
+
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
 static thread_local bool t_hook_enable = false;
 
@@ -26,6 +27,17 @@ void set_hook_enable(bool flag) {
 // main 函数前调用
 namespace zhou {
 
+#define HOOK_ALL_XX(XX) \
+    XX(sleep)           \
+    XX(usleep)          \
+    XX(nanosleep)       \
+                        \
+    XX(socket)          \
+    XX(connect)         \
+    XX(accept)          
+
+
+
 void hook_init() {
     static bool is_inited = false;
     if (is_inited) {
@@ -33,9 +45,7 @@ void hook_init() {
     }
 // 将 函数指针 hook
 #define XX(name) name ## _hook = (name ## _fun_p)dlsym(RTLD_NEXT, #name);
-    XX(sleep)
-    XX(usleep)
-    XX(nanosleep)
+    HOOK_ALL_XX(XX)
 #undef XX
 } 
 

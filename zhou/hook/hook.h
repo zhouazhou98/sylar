@@ -1,6 +1,7 @@
 #ifndef __ZHOU_HOOK_H__
 #define __ZHOU_HOOK_H__
 
+// 对于所有 IO 的 hook ， 目的是将原本阻塞调用的 IO 操作使用协程改写为 异步操作
 
 namespace zhou {
 
@@ -34,6 +35,33 @@ extern usleep_fun_p usleep_hook;
 // int nanosleep(const struct timespec *req, struct timespec *rem);
 typedef int (*nanosleep_fun_p) (const struct timespec *req, struct timespec *rem);
 extern nanosleep_fun_p nanosleep_hook;
+
+
+// 2. -------------- socket --------------
+// 2.1 socket
+#include <sys/types.h>
+#include <sys/socket.h>
+// int socket(int domain, int type, int protocol);
+typedef int (*socket_fun_p) (int domain, int type, int protocol);
+extern socket_fun_p socket_hook;
+
+// 2.2 connet
+// int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+typedef int (*connect_fun_p) (int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+extern connect_fun_p connect_hook;
+
+// 2.3 accept
+// int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+typedef int (*accept_fun_p) (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+extern accept_fun_p accept_hook;
+
+
+// 2. -------------- fd control function --------------
+// 3.1 fcntl
+#include <fcntl.h>
+// int fcntl(int fd, int cmd, ... /* arg */ );
+typedef int (*fcntl_fun_p) (int fd, int cmd, ... /* arg */ );
+extern fcntl_fun_p fcntl_hook;
 
 
 

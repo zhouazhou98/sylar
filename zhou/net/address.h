@@ -4,6 +4,8 @@
 #include <memory>
 #include <sys/socket.h>
 #include <string>
+#include <vector>
+#include <map>
 
 // 为什么在 iomanager 中使用 管道， 而在这里又封装 unix socket 来进行进程间通信？
 //  https://blog.csdn.net/qq_34999565/article/details/119533013 描述 pipe 和 unix socket 的区别
@@ -43,7 +45,37 @@ public:
 
 public:
 // static
+    // 创建一个地址
     static ptr Create(const sockaddr * addr);
+    // 根据域名解析得到所有地址
+        // result: 解析得到的地址列表
+        // host: 应用层 域名
+        // family: 网络层 协议簇 IPv4, IPv6, Unix domain, AX, Bluetooth, etc...
+        // type: 数据传输层 字节流 byte stream / 数据报 datagram
+        // protocol: 传输层协议 tcp / udp
+    // return: 是否解析成功
+    static bool Lookup(std::vector<Address::ptr> & result, const std::string & host,
+                        int family = AF_INET, int type = 0, int protocol = 0);
+
+    // 根据域名解析得到任意一个地址
+    static Address::ptr LookupAny(const std::string & host, 
+                        int family = AF_INET, int type = 0, int protocol = 0);
+    // 根据域名解析得到任意一个 IP 地址
+    static Address::ptr LookupAnyIPAddress(const std::string & host, 
+                        int family = AF_INET, int type = 0, int protocol = 0);
+
+    // 返回本机所有网卡的 <网卡名, 地址, 子网掩码位数>
+    static bool GetInterfaceAddresses(  std::multimap   <   std::string, 
+                                                            std::pair<Address::ptr, uint32_t> 
+                                                        > & result,
+                                        int family = AF_INET
+                                    );
+
+    // 返回本机指定网卡的 <地址, 子网掩码位数>
+    static bool GetInterfaceAddress(    std::vector<std::pair<Address::ptr, uint32_t>> & result,
+                                        std::string & iface,        // 哪个网卡
+                                        int family = AF_INET
+                                    );
 
 public:
 

@@ -1,5 +1,5 @@
 # CMake 最小版本
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.12)
 # CMake 定义项目名称
 project(zhou)               
 
@@ -41,10 +41,12 @@ set(LIB_SRC
     zhou/timer/timer_manager.cc             # 定时器管理器
     zhou/hook/hook.cc
     zhou/hook/sleep.cc
+    zhou/hook/socket.cc
     zhou/net/address.cc
     zhou/net/ipv4_address.cc
     zhou/net/ipv6_address.cc
     zhou/net/unix_address.cc
+    # zhou/net/socket.cc
     )
 
 
@@ -183,6 +185,16 @@ target_link_libraries(${TEST_EXEC} zhou)
 
 # 生成测试文件 test                    
 set(TEST_EXEC test_hook)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_address)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      
