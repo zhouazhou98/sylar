@@ -4,6 +4,7 @@
 // #include "zhou/zhou.h"
 #include <memory>
 #include <sys/socket.h>
+#include "address.h"
 
 namespace zhou {
 
@@ -34,7 +35,7 @@ public:
         // IPv6 socket
         IPv6 = AF_INET6,
         // Unix socket
-        UNIX = AF_INET
+        UNIX = AF_UNIX,
     };
 
 public:

@@ -46,7 +46,7 @@ set(LIB_SRC
     zhou/net/ipv4_address.cc
     zhou/net/ipv6_address.cc
     zhou/net/unix_address.cc
-    # zhou/net/socket.cc
+    zhou/net/socket.cc
     )
 
 
