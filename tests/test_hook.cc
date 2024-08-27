@@ -6,6 +6,7 @@ void test_hook_sleep() {
     zhou::IOManager::ptr iom(new zhou::IOManager(2, false));
     iom->start();
     sleep(1);
+    sleep(2);
     iom->stop();
 }
 
