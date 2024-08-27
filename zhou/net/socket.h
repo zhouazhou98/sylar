@@ -17,6 +17,7 @@ public:
     // type: byte stream / datagram 使用字节流还是数据报 (不过 TCP 是使用字节流， UDP 使用数据报)
     // protocol: TCP / UDP 传输层协议
     Socket(int family, int type, int protocol = 0);
+    Socket(Address::ptr addr, int type, int protocol = 0);
     ~Socket();
 
 public:

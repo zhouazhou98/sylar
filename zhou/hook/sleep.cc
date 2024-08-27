@@ -2,6 +2,9 @@
 #include "zhou/log/log.h"
 #include "zhou/log/log_manager.h"
 #include "zhou/utils/macro.h"
+#include "zhou/fiber/fiber.h"
+#include "zhou/fiber/iomanager.h"
+#include "zhou/fiber/scheduler.h"
 
 
 static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
@@ -22,8 +25,38 @@ extern "C" {
 // 使用 IOManager 来实现 epoll 超时调用
 // 1.1 sleep 毫秒
 unsigned int sleep(unsigned int seconds) {
+    ZHOU_INFO(g_logger) << "sleep hook";
+    if (!zhou::is_hook_enable()) {
+        sleep_hook(seconds);
+    }
+
+    zhou::Fiber::ptr fiber = zhou::Fiber::GetThis();    // 获取当前线程运行的协程
+    zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
 
     ZHOU_INFO(g_logger) << "sleep hook";
+    // iom->addTimer(
+    //     seconds * 1000, 
+    //     std::bind(          // 生成一个函数对象，该对象可以将成员函数与对象实例绑定在一起
+    //         ( void (zhou::Scheduler::*) (zhou::Fiber::ptr, int thread) )    // 将 zhou::Scheduler::schedule 地址看作 void (zhou::Scheduler::*) (zhou::Fiber::ptr, int thread)
+    //                 & zhou::Scheduler::schedule,
+    //         iom,        // iom 对象实例  ---> 由于 zhou::Scheduler 是 zhou::IOManager 基类，因此这里用了泛型
+    //         fiber,      // 要调度的协程
+    //         -1          // 选择任意线程
+    //     )
+    // );
+    // lambda 简化代码
+    iom->addTimer(seconds * 1000, [iom, fiber]() {
+            ZHOU_INFO(g_logger) << "scheuling...";
+            iom->schedule(fiber, -1);
+            ZHOU_INFO(g_logger) << "scheuling... end";
+        },
+        false
+    );
+
+
+    ZHOU_INFO(g_logger) << "sleep hook end";
+
+    // zhou::Fiber::YeildToHold();
     return 0;
 }
 

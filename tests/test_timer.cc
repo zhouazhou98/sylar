@@ -12,10 +12,16 @@ void test_timer() {
         ZHOU_INFO(g_logger) << "hello timer i = " << i;
         if(++i == 3) {
             // s_timer->refresh();
-            s_timer->reset(2000, true);
-            // s_timer->cancel();
+            // s_timer->reset(2000, true);
+            s_timer->cancel();
         }
     }, true);
+
+    zhou::Timer::ptr timer = iom->addTimer(1000, [](){
+            ZHOU_INFO(g_logger) << "hello";
+        },
+        false
+    );
     iom->stop();
 }
 
