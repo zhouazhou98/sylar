@@ -7,7 +7,7 @@ namespace zhou {
 
 static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
 
-static thread_local bool t_hook_enable = false;
+static thread_local bool t_hook_enable = true;
 
 // 当前线程是否开启 hook
 bool is_hook_enable() {

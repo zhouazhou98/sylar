@@ -25,50 +25,58 @@ extern "C" {
 // 使用 IOManager 来实现 epoll 超时调用
 // 1.1 sleep 毫秒
 unsigned int sleep(unsigned int seconds) {
-    ZHOU_INFO(g_logger) << "sleep hook";
-    // if (!zhou::is_hook_enable()) {
-    //     return sleep_hook(seconds);
-    // }
+    if (!zhou::is_hook_enable()) {
+        return sleep_hook(seconds);
+    }
 
-    zhou::Fiber::ptr fiber = zhou::Fiber::GetThis();    // 获取当前线程运行的协程
+    ZHOU_INFO(g_logger) << "sleep hook";
     zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
 
-    ZHOU_INFO(g_logger) << "sleep hook";
-    // iom->addTimer(
-    //     seconds * 1000, 
-    //     std::bind(          // 生成一个函数对象，该对象可以将成员函数与对象实例绑定在一起
-    //         ( void (zhou::Scheduler::*) (zhou::Fiber::ptr, int thread) )    // 将 zhou::Scheduler::schedule 地址看作 void (zhou::Scheduler::*) (zhou::Fiber::ptr, int thread)
-    //                 & zhou::Scheduler::schedule,
-    //         iom,        // iom 对象实例  ---> 由于 zhou::Scheduler 是 zhou::IOManager 基类，因此这里用了泛型
-    //         fiber,      // 要调度的协程
-    //         -1          // 选择任意线程
-    //     )
-    // );
     // lambda 简化代码
     iom->addTimer(seconds * 1000, [iom]() {
-            ZHOU_INFO(g_logger) << "scheuling...";
             iom->schedule(zhou::Fiber::GetThis(), -1);
-            ZHOU_INFO(g_logger) << "scheuling... end";
         }
     );
 
-
-    ZHOU_INFO(g_logger) << "sleep hook end";
-
-    ZHOU_INFO(g_logger) << "swap in";
     return 0;
 }
 
 // 1.2 usleep 微秒
 // int usleep(useconds_t usec);
 int usleep(useconds_t usec) {
+    if (!zhou::is_hook_enable()) {
+        return usleep_hook(usec);
+    }
+
     ZHOU_INFO(g_logger) << "usleep hook";
+    zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
+
+    // lambda 简化代码
+    iom->addTimer(usec / 1000, [iom]() {
+            iom->schedule(zhou::Fiber::GetThis(), -1);
+        }
+    );
+
     return 0;
 }
 
 // 1.3 nanosleep
 int nanosleep(const struct timespec *req, struct timespec *rem) {
+    if (!zhou::is_hook_enable()) {
+        return nanosleep_hook(req, rem);
+    }
+
     ZHOU_INFO(g_logger) << "nanosleep hook";
+    zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
+
+    int timeout_ms = req->tv_sec * 1000 + req->tv_nsec / 1000 /1000;
+
+    // lambda 简化代码
+    iom->addTimer(timeout_ms, [iom]() {
+            iom->schedule(zhou::Fiber::GetThis(), -1);
+        }
+    );
+
     return 0;
 }
 
