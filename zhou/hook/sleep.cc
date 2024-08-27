@@ -55,7 +55,6 @@ unsigned int sleep(unsigned int seconds) {
 
     ZHOU_INFO(g_logger) << "sleep hook end";
 
-    zhou::Fiber::GetThis()->swapOut();
     ZHOU_INFO(g_logger) << "swap in";
     return 0;
 }
