@@ -21,9 +21,13 @@ extern "C" {
 // 3.1 fcntl
 // #include <fcntl.h>
 // int fcntl(int fd, int cmd, ... /* arg */ );
-int fcntl(int fd, int cmd, ... /* arg */ ) {
-    return 0;
-}
+// int fcntl(int fd, int cmd, ... /* arg */ ) {
+//     va_list va;
+//     va_start(va, cmd);
+//     int arg = va_arg(va, int);
+//     fcntl(fd, cmd);
+//     return 0;
+// }
 
 
 #ifdef __cplusplus

@@ -29,15 +29,16 @@ unsigned int sleep(unsigned int seconds) {
         return sleep_hook(seconds);
     }
 
-    ZHOU_INFO(g_logger) << "sleep hook";
     zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
 
     // lambda 简化代码
     iom->addTimer(seconds * 1000, [iom]() {
+            ZHOU_INFO(g_logger) << "sleep hook";
             iom->schedule(zhou::Fiber::GetThis(), -1);
         }
     );
 
+    // zhou::Fiber::GetThis()->swapOut();
     return 0;
 }
 

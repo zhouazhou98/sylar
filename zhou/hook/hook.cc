@@ -38,7 +38,9 @@ namespace zhou {
                         \
     XX(socket)          \
     XX(connect)         \
-    XX(accept)          
+    XX(accept)          \
+                        \
+    XX(fcntl)
 
 
 void hook_init() {

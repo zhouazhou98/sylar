@@ -112,9 +112,10 @@ int  connect_with_timeout(int sockfd, const struct sockaddr * addr, socklen_t ad
     if (-1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len)) {
         return -1;
     }
+    // 若正确连接则返回 0
     if(!error) {
         return 0;
-    } else {
+    } else {    // 否则继续返回 -1，并设置 errno
         errno = error;
         return -1;
     }
