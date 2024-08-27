@@ -26,9 +26,9 @@ extern "C" {
 // 1.1 sleep 毫秒
 unsigned int sleep(unsigned int seconds) {
     ZHOU_INFO(g_logger) << "sleep hook";
-    if (!zhou::is_hook_enable()) {
-        sleep_hook(seconds);
-    }
+    // if (!zhou::is_hook_enable()) {
+    //     return sleep_hook(seconds);
+    // }
 
     zhou::Fiber::ptr fiber = zhou::Fiber::GetThis();    // 获取当前线程运行的协程
     zhou::IOManager * iom = zhou::IOManager::GetThis(); // 获取当前线程的 IO 管理器
@@ -45,12 +45,12 @@ unsigned int sleep(unsigned int seconds) {
     //     )
     // );
     // lambda 简化代码
-    iom->addTimer(seconds * 1000, [iom, fiber]() {
+    static zhou::Timer::ptr s_timer = iom->addTimer(seconds * 1000, [iom, fiber]() {
             ZHOU_INFO(g_logger) << "scheuling...";
             iom->schedule(fiber, -1);
             ZHOU_INFO(g_logger) << "scheuling... end";
-        },
-        false
+            s_timer->cancel();
+        }
     );
 
 
