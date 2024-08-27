@@ -14,7 +14,7 @@ void test_timer(zhou::IOManager::ptr iom) {
         static int i = 0;
         {
             zhou::RWMutex::WriteLock lock(g_mutex);
-        ZHOU_INFO(g_logger) << "hello timer i = " << i;
+            ZHOU_INFO(g_logger) << "hello timer i = " << i;
             i = i + 1;
             if(i == 30) {
                 // s_timer->refresh();

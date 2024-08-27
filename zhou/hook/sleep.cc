@@ -47,16 +47,15 @@ unsigned int sleep(unsigned int seconds) {
     // lambda 简化代码
     static zhou::Timer::ptr s_timer = iom->addTimer(seconds * 1000, [iom, fiber]() {
             ZHOU_INFO(g_logger) << "scheuling...";
-            iom->schedule(fiber, -1);
+            iom->schedule(zhou::Fiber::GetThis(), -1);
             ZHOU_INFO(g_logger) << "scheuling... end";
-            s_timer->cancel();
         }
     );
 
 
     ZHOU_INFO(g_logger) << "sleep hook end";
 
-    // zhou::Fiber::YeildToHold();
+    fiber->swapOut();
     return 0;
 }
 

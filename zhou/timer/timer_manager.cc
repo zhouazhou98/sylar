@@ -79,6 +79,7 @@ void TimerManager::listExpiredCallback(std::vector<std::function<void()>> & call
     }
 
     expired.insert(expired.begin(), m_timers.begin(), iter);
+    m_timers.erase(m_timers.begin(), iter);
     callbacks.reserve(expired.size());
 
     for (auto & timer : expired) {
