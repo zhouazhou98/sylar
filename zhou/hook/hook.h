@@ -2,6 +2,7 @@
 #define __ZHOU_HOOK_H__
 
 #include <memory>
+#include <sys/types.h>
 
 // 对于所有 IO 的 hook ， 目的是将原本阻塞调用的 IO 操作使用协程改写为 异步操作
 
@@ -14,6 +15,9 @@ void set_hook_enable(bool flag);
 
 extern uint64_t get_s_connect_timeout();
 
+template<typename OriginFun, typename... Args>
+ssize_t do_io(int fd, OriginFun fun, const char* hook_fun_name,
+        uint32_t event, int timeout_so, Args&&... args);
 }
 
 struct timer_info {

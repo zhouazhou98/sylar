@@ -103,6 +103,7 @@ int  connect_with_timeout(int sockfd, const struct sockaddr * addr, socklen_t ad
             timer->cancel();
         }
         ZHOU_ERROR(g_logger) << "connect addEvent(socket fd: " << sockfd << ", WRITE) error";
+        return -1;
     }
 
     // 5.4 检查 “正在连接” 的 socket fd 是否已经正常连接
@@ -132,11 +133,15 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     return connect_with_timeout(sockfd, addr, addrlen, zhou::get_s_connect_timeout());
 }
 
+
 // 2.3 accept
 // int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
-
-    return 0;
+    int fd = zhou::do_io(sockfd, accept_hook, "accept", zhou::IOManager::READ, SO_RCVTIMEO, addr, addrlen);
+    if (fd >= 0) {
+        zhou::SingleFDManager::GetInstance()->get(sockfd, true);
+    }
+    return fd;
 }
 
 
