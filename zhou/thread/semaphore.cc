@@ -3,7 +3,10 @@
 #include <semaphore.h>
 #include <stdexcept>
 
-#include "zhou/zhou.h"
+#include <zhou/utils/macro.h>
+#include <zhou/log/log.h>
+#include <zhou/log/log_manager.h>
+// #include "zhou/zhou.h"
 
 namespace zhou {
 

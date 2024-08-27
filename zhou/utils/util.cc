@@ -19,7 +19,11 @@ uint32_t GetFiberId() {
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include "zhou/zhou.h"
+
+#include <zhou/log/log.h>
+#include <zhou/log/log_manager.h>
+#include <zhou/utils/macro.h>
+// #include "zhou/zhou.h"
 
 namespace zhou {
 

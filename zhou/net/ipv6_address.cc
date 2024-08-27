@@ -1,6 +1,9 @@
 #include "ip_address.h"
-#include "zhou/zhou.h"
+// #include "zhou/zhou.h"
 #include <string.h>
+#include "zhou/log/log.h"
+#include "zhou/log/log_manager.h"
+#include "zhou/utils/macro.h"
 
 
 namespace zhou {

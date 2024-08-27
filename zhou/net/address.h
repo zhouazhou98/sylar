@@ -46,7 +46,7 @@ public:
 public:
 // static
     // 创建一个地址
-    static ptr Create(const sockaddr * addr);
+    static ptr Create(const struct sockaddr * addr);
     // 根据域名解析得到所有地址
         // result: 解析得到的地址列表
         // host: 应用层 域名

@@ -1,4 +1,4 @@
-#include "hook.h"
+#include "zhou/hook/hook.h"
 #include "zhou/log/log.h"
 #include "zhou/log/log_manager.h"
 
@@ -19,6 +19,10 @@ void set_hook_enable(bool flag) {
     t_hook_enable = flag;
 }
 
+static uint64_t s_connect_timeout = -1;
+uint64_t get_s_connect_timeout() {
+    return s_connect_timeout;
+}
 }
 
 
@@ -35,7 +39,6 @@ namespace zhou {
     XX(socket)          \
     XX(connect)         \
     XX(accept)          
-
 
 
 void hook_init() {

@@ -39,14 +39,17 @@ set(LIB_SRC
     zhou/fiber/iomanager_timer.cc
     zhou/timer/timer.cc                 # 定时器
     zhou/timer/timer_manager.cc             # 定时器管理器
-    zhou/hook/hook.cc
-    zhou/hook/sleep.cc
-    zhou/hook/socket.cc
-    zhou/net/address.cc
-    zhou/net/ipv4_address.cc
-    zhou/net/ipv6_address.cc
-    zhou/net/unix_address.cc
-    zhou/net/socket.cc
+    zhou/hook/hook.cc                   # IO hook 模块
+    zhou/hook/sleep.cc                      # sleep hook: sleep usleep nanosleep
+    zhou/hook/fd_ctx.cc                         # socket etc ... IO 管理
+    zhou/hook/fd_manager.cc                 
+    zhou/hook/socket.cc                     # socket hook: bind connect listen accept
+    zhou/hook/fcntl.cc                      # fcntl hook: fcntl
+    zhou/net/address.cc                 # socket 地址封装
+    zhou/net/ipv4_address.cc                # IPv4 socket 地址封装
+    zhou/net/ipv6_address.cc                # IPv6 socket 地址封装
+    zhou/net/unix_address.cc                # Unix socket 地址封装
+    zhou/net/socket.cc                  # socket 封装
     )
 
 

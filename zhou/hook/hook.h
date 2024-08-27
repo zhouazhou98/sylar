@@ -1,6 +1,8 @@
 #ifndef __ZHOU_HOOK_H__
 #define __ZHOU_HOOK_H__
 
+#include <memory>
+
 // 对于所有 IO 的 hook ， 目的是将原本阻塞调用的 IO 操作使用协程改写为 异步操作
 
 namespace zhou {
@@ -10,8 +12,21 @@ bool is_hook_enable();
 // 设置当前线程的 hool 状态
 void set_hook_enable(bool flag);
 
+extern uint64_t get_s_connect_timeout();
+
 }
 
+struct timer_info {
+    typedef std::shared_ptr<timer_info> ptr;
+    typedef std::weak_ptr<timer_info> w_ptr;
+    int is_cancled = 0;
+};
+
+#include <unistd.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +34,7 @@ extern "C" {
 
 // 1. -------------- sleep --------------
 // 1.1 sleep
-#include <unistd.h>
+// #include <unistd.h>
 //  unsigned int sleep(unsigned int seconds);
 typedef unsigned int (*sleep_fun_p) (unsigned int seconds);
 extern sleep_fun_p sleep_hook;
@@ -31,7 +46,7 @@ typedef int (*usleep_fun_p) (useconds_t usec);
 extern usleep_fun_p usleep_hook;
 
 // 1.3 nanosleep
-#include <time.h>
+// #include <time.h>
 // int nanosleep(const struct timespec *req, struct timespec *rem);
 typedef int (*nanosleep_fun_p) (const struct timespec *req, struct timespec *rem);
 extern nanosleep_fun_p nanosleep_hook;
@@ -39,8 +54,8 @@ extern nanosleep_fun_p nanosleep_hook;
 
 // 2. -------------- socket --------------
 // 2.1 socket
-#include <sys/types.h>
-#include <sys/socket.h>
+// #include <sys/types.h>
+// #include <sys/socket.h>
 // int socket(int domain, int type, int protocol);
 typedef int (*socket_fun_p) (int domain, int type, int protocol);
 extern socket_fun_p socket_hook;
@@ -56,9 +71,9 @@ typedef int (*accept_fun_p) (int sockfd, struct sockaddr *addr, socklen_t *addrl
 extern accept_fun_p accept_hook;
 
 
-// 2. -------------- fd control function --------------
+// 3. -------------- fd control function --------------
 // 3.1 fcntl
-#include <fcntl.h>
+// #include <fcntl.h>
 // int fcntl(int fd, int cmd, ... /* arg */ );
 typedef int (*fcntl_fun_p) (int fd, int cmd, ... /* arg */ );
 extern fcntl_fun_p fcntl_hook;

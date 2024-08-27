@@ -1,9 +1,10 @@
 #ifndef __ZHOU_SOCKET_H__
 #define __ZHOU_SOCKET_H__
 
-// #include "zhou/zhou.h"
 #include <memory>
 #include <sys/socket.h>
+#include <sys/types.h>
+// #include <bits/socket_type.h>
 #include "address.h"
 
 namespace zhou {

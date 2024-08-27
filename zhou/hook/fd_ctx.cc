@@ -55,7 +55,7 @@ bool FDCtx::init(){
         int flags = fcntl_hook(m_fd, F_GETFL, 0);
         // 若阻塞则改为非阻塞
         if (!(flags & O_NONBLOCK)) {
-            int flags = fcntl_hook(m_fd, F_SETFL, flags | O_NONBLOCK);
+            fcntl_hook(m_fd, F_SETFL, flags | O_NONBLOCK);
         }
         m_sysNonblock = true;
     } else {
