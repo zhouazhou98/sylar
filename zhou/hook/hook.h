@@ -86,7 +86,7 @@ extern read_fun_p read_hook;
 #include <sys/uio.h>
 // ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 typedef ssize_t (*readv_fun_p) (int fd, const struct iovec *iov, int iovcnt);
-extern read_fun_p readv_hook;
+extern readv_fun_p readv_hook;
 
 // 3.3 recv, recvfrom, recvmsg
 #include <sys/types.h>

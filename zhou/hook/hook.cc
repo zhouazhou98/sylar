@@ -44,6 +44,12 @@ namespace zhou {
     XX(connect)         \
     XX(accept)          \
                         \
+    XX(read)            \
+    XX(readv)           \
+    XX(recv)            \
+    XX(recvfrom)        \
+    XX(recvmsg)         \
+                        \
     XX(fcntl)
 
 
@@ -160,6 +166,19 @@ retry:
 template ssize_t do_io<int (*)(int, sockaddr*, unsigned int*), sockaddr*&, unsigned int*&>(
     int, int (*)(int, sockaddr*, unsigned int*), const char*, unsigned int, int, sockaddr*&, unsigned int*&);
 
+template ssize_t do_io<long (*)(int, void*, unsigned long, int, sockaddr*, unsigned int*), void*&, unsigned long&, int&, sockaddr*&, unsigned int*&>(
+    int, long (*)(int, void*, unsigned long, int, sockaddr*, unsigned int*), char const*, unsigned int, int, void*&, unsigned long&, int&, sockaddr*&, unsigned int*&);
 
+template ssize_t do_io<long (*)(int, void*, unsigned long), void*&, unsigned long&>(
+    int, long (*)(int, void*, unsigned long), char const*, unsigned int, int, void*&, unsigned long&);
+
+template ssize_t do_io<long (*)(int, msghdr*, int), msghdr*&, int&>(
+    int, long (*)(int, msghdr*, int), char const*, unsigned int, int, msghdr*&, int&);
+
+template ssize_t do_io<long (*)(int, iovec const*, int), iovec const*&, int&>(
+    int, long (*)(int, iovec const*, int), char const*, unsigned int, int, iovec const*&, int&);
+
+template ssize_t do_io<long (*)(int, void*, unsigned long, int), void*&, unsigned long&, int&>(
+    int, long (*)(int, void*, unsigned long, int), char const*, unsigned int, int, void*&, unsigned long&, int&);
 
 }
