@@ -74,6 +74,21 @@ extern connect_fun_p connect_hook;
 typedef int (*accept_fun_p) (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 extern accept_fun_p accept_hook;
 
+// 2.4 getsockopt setsockopt
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
+// int getsockopt(int sockfd, int level, int optname,
+//             void *optval, socklen_t *optlen);
+typedef int (*getsockopt_fun_p) (int sockfd, int level, int optname,
+            void *optval, socklen_t *optlen);
+extern getsockopt_fun_p getsockopt_hook;
+
+// int setsockopt(int sockfd, int level, int optname,
+//             const void *optval, socklen_t optlen);
+typedef int (*setsockopt_fun_p) (int sockfd, int level, int optname,
+            const void *optval, socklen_t optlen);
+extern setsockopt_fun_p setsockopt_hook;
+
 
 // 3. -------------- read function --------------
 // 3.1 read
@@ -139,12 +154,23 @@ extern sendmsg_fun_p sendmsg_hook;
 
 
 // 5. -------------- fd control function --------------
-// 5.1 fcntl
-// #include <fcntl.h>
+// 5.1 close
+#include <unistd.h>
+// int close(int fd);
+typedef int (*close_fun_p) (int fd);
+extern close_fun_p close_hook;
+
+// 5.2 fcntl
+#include <fcntl.h>
 // int fcntl(int fd, int cmd, ... /* arg */ );
 typedef int (*fcntl_fun_p) (int fd, int cmd, ... /* arg */ );
 extern fcntl_fun_p fcntl_hook;
 
+// 5.3 ioctl
+#include <sys/ioctl.h>
+// int ioctl(int fd, unsigned long request, ...);
+typedef int (*ioctl_fun_p) (int fd, unsigned long request, ...);
+extern ioctl_fun_p ioctl_hook;
 
 
 #ifdef __cplusplus

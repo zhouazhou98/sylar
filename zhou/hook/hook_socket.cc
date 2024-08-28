@@ -19,6 +19,8 @@ extern "C" {
     XX(socket)
     XX(connect)
     XX(accept)
+    XX(getsockopt)
+    XX(setsockopt)
 #undef XX
 
 
@@ -144,6 +146,31 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     return fd;
 }
 
+
+// 2.4 getsockopt setsockopt
+int getsockopt(int sockfd, int level, int optname,
+        void *optval, socklen_t *optlen) {
+    return getsockopt_hook(sockfd, level, optname, optval, optlen);
+}
+
+int setsockopt(int sockfd, int level, int optname,
+        const void *optval, socklen_t optlen) {
+    if (!zhou::is_hook_enable()) {
+        return setsockopt_hook(sockfd, level, optname, optval, optlen);
+    }
+
+    if (level == SOL_SOCKET) {
+        if (optname == SO_RCVTIMEO || optname == SO_SNDTIMEO) {
+            zhou::FDCtx::ptr ctx = zhou::SingleFDManager::GetInstance()->get(sockfd);
+            if (ctx) {
+                const timeval * v = (const timeval *)optval;
+                ctx->setTimeout(optname, v->tv_sec * 1000 + v->tv_usec / 1000);
+            }
+        }
+    }
+    return setsockopt_hook(sockfd, level, optname, optval, optlen);
+
+}
 
 
 #ifdef __cplusplus

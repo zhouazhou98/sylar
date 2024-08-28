@@ -46,7 +46,7 @@ set(LIB_SRC
     zhou/hook/hook_socket.cc                # socket hook: socket connect accept. 关于 bind 和 listen 会在 Socket 中封装
     zhou/hook/hook_read.cc                  # read hook:  read  readv  recv recvfrom recvmsg
     zhou/hook/hook_write.cc                 # write hook: write writev send sendto   sendmsg
-    zhou/hook/hook_fcntl.cc                 # fcntl hook: fcntl
+    zhou/hook/hook_fdctl.cc                 # fcntl hook: fcntl
     zhou/net/address.cc                 # socket 地址封装
     zhou/net/ipv4_address.cc                # IPv4 socket 地址封装
     zhou/net/ipv6_address.cc                # IPv6 socket 地址封装

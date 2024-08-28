@@ -43,6 +43,8 @@ namespace zhou {
     XX(socket)          \
     XX(connect)         \
     XX(accept)          \
+    XX(getsockopt)      \
+    XX(setsockopt)      \
                         \
     XX(read)            \
     XX(readv)           \
@@ -50,13 +52,15 @@ namespace zhou {
     XX(recvfrom)        \
     XX(recvmsg)         \
                         \
-    XX(write)            \
-    XX(writev)           \
+    XX(write)           \
+    XX(writev)          \
     XX(send)            \
-    XX(sendto)        \
+    XX(sendto)          \
     XX(sendmsg)         \
                         \
-    XX(fcntl)
+    XX(close)           \
+    XX(fcntl)           \
+    XX(ioctl)
 
 
 void hook_init() {
