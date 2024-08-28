@@ -50,6 +50,12 @@ namespace zhou {
     XX(recvfrom)        \
     XX(recvmsg)         \
                         \
+    XX(write)            \
+    XX(writev)           \
+    XX(send)            \
+    XX(sendto)        \
+    XX(sendmsg)         \
+                        \
     XX(fcntl)
 
 
@@ -166,6 +172,7 @@ retry:
 template ssize_t do_io<int (*)(int, sockaddr*, unsigned int*), sockaddr*&, unsigned int*&>(
     int, int (*)(int, sockaddr*, unsigned int*), const char*, unsigned int, int, sockaddr*&, unsigned int*&);
 
+// read
 template ssize_t do_io<long (*)(int, void*, unsigned long, int, sockaddr*, unsigned int*), void*&, unsigned long&, int&, sockaddr*&, unsigned int*&>(
     int, long (*)(int, void*, unsigned long, int, sockaddr*, unsigned int*), char const*, unsigned int, int, void*&, unsigned long&, int&, sockaddr*&, unsigned int*&);
 
@@ -180,5 +187,19 @@ template ssize_t do_io<long (*)(int, iovec const*, int), iovec const*&, int&>(
 
 template ssize_t do_io<long (*)(int, void*, unsigned long, int), void*&, unsigned long&, int&>(
     int, long (*)(int, void*, unsigned long, int), char const*, unsigned int, int, void*&, unsigned long&, int&);
+
+
+// write
+template long do_io<long (*)(int, void const*, unsigned long), void const*&, unsigned long&>
+    (int, long (*)(int, void const*, unsigned long), char const*, unsigned int, int, void const*&, unsigned long&);
+
+template long do_io<long (*)(int, void const*, unsigned long, int), void const*&, unsigned long&, int&>
+    (int, long (*)(int, void const*, unsigned long, int), char const*, unsigned int, int, void const*&, unsigned long&, int&);
+
+template long do_io<long (*)(int, msghdr const*, int), msghdr const*&, int&>
+    (int, long (*)(int, msghdr const*, int), char const*, unsigned int, int, msghdr const*&, int&);
+
+template long do_io<long (*)(int, void const*, unsigned long, int, sockaddr const*, unsigned int), void const*&, unsigned long&, int&, sockaddr const*&, unsigned int&>
+    (int, long (*)(int, void const*, unsigned long, int, sockaddr const*, unsigned int), char const*, unsigned int, int, void const*&, unsigned long&, int&, sockaddr const*&, unsigned int&);
 
 }

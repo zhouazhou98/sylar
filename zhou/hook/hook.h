@@ -108,11 +108,38 @@ extern recvmsg_fun_p recvmsg_hook;
 
 
 // 4. -------------- write function --------------
+// 4.1 write
+#include <unistd.h>
+// ssize_t write(int fd, const void *buf, size_t count);
+typedef ssize_t (*write_fun_p) (int fd, const void *buf, size_t count);
+extern write_fun_p write_hook;
+
+// 4.2 writev
+#include <sys/uio.h>
+// ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
+typedef ssize_t (*writev_fun_p) (int fd, const struct iovec *iov, int iovcnt);
+extern writev_fun_p writev_hook;
+
+// 4.3 send sendto sendmsg
+#include <sys/types.h>
+#include <sys/socket.h>
+// ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+typedef ssize_t (*send_fun_p) (int sockfd, const void *buf, size_t len, int flags);
+extern send_fun_p send_hook;
+
+// ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+//                       const struct sockaddr *dest_addr, socklen_t addrlen);
+typedef ssize_t (*sendto_fun_p) (int sockfd, const void *buf, size_t len, int flags,
+                    const struct sockaddr *dest_addr, socklen_t addrlen);
+extern sendto_fun_p sendto_hook;
+
+// ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags);
+typedef ssize_t (*sendmsg_fun_p) (int sockfd, const struct msghdr *msg, int flags);
+extern sendmsg_fun_p sendmsg_hook;
 
 
-
-// 3. -------------- fd control function --------------
-// 3.1 fcntl
+// 5. -------------- fd control function --------------
+// 5.1 fcntl
 // #include <fcntl.h>
 // int fcntl(int fd, int cmd, ... /* arg */ );
 typedef int (*fcntl_fun_p) (int fd, int cmd, ... /* arg */ );
