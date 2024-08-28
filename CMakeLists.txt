@@ -40,11 +40,12 @@ set(LIB_SRC
     zhou/timer/timer.cc                 # 定时器
     zhou/timer/timer_manager.cc             # 定时器管理器
     zhou/hook/hook.cc                   # IO hook 模块
-    zhou/hook/sleep.cc                      # sleep hook: sleep usleep nanosleep
-    zhou/hook/fd_ctx.cc                         # socket etc ... IO 管理
+    zhou/hook/hook_sleep.cc                 # sleep hook: sleep usleep nanosleep
+    zhou/hook/fd_ctx.cc                     # socket etc ... IO 管理
     zhou/hook/fd_manager.cc                 
-    zhou/hook/socket.cc                     # socket hook: socket connect accept. 关于 bind 和 listen 会在 Socket 中封装
-    zhou/hook/fcntl.cc                      # fcntl hook: fcntl
+    zhou/hook/hook_socket.cc                # socket hook: socket connect accept. 关于 bind 和 listen 会在 Socket 中封装
+    zhou/hook/hook_read.cc                  # read hook: read readv recv recvfrom recvmsg
+    zhou/hook/hook_fcntl.cc                 # fcntl hook: fcntl
     zhou/net/address.cc                 # socket 地址封装
     zhou/net/ipv4_address.cc                # IPv4 socket 地址封装
     zhou/net/ipv6_address.cc                # IPv6 socket 地址封装

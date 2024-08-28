@@ -75,6 +75,42 @@ typedef int (*accept_fun_p) (int sockfd, struct sockaddr *addr, socklen_t *addrl
 extern accept_fun_p accept_hook;
 
 
+// 3. -------------- read function --------------
+// 3.1 read
+#include <unistd.h>
+// ssize_t read(int fd, void *buf, size_t count);
+typedef ssize_t (*read_fun_p) (int fd, void *buf, size_t count);
+extern read_fun_p read_hook;
+
+// 3.2 readv
+#include <sys/uio.h>
+// ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
+typedef ssize_t (*readv_fun_p) (int fd, const struct iovec *iov, int iovcnt);
+extern read_fun_p readv_hook;
+
+// 3.3 recv, recvfrom, recvmsg
+#include <sys/types.h>
+#include <sys/socket.h>
+
+// ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+typedef ssize_t (*recv_fun_p) (int sockfd, void *buf, size_t len, int flags);
+extern recv_fun_p recv_hook;
+
+// ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+//                         struct sockaddr *src_addr, socklen_t *addrlen);
+typedef ssize_t (*recvfrom_fun_p) (int sockfd, void *buf, size_t len, int flags,
+                        struct sockaddr *src_addr, socklen_t *addrlen);
+extern recvfrom_fun_p recvfrom_hook;
+
+// ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
+typedef ssize_t (*recvmsg_fun_p) (int sockfd, struct msghdr *msg, int flags);
+extern recvmsg_fun_p recvmsg_hook;
+
+
+// 4. -------------- write function --------------
+
+
+
 // 3. -------------- fd control function --------------
 // 3.1 fcntl
 // #include <fcntl.h>
