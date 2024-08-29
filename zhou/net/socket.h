@@ -6,6 +6,7 @@
 #include <sys/types.h>
 // #include <bits/socket_type.h>
 #include "address.h"
+#include <ostream>
 
 namespace zhou {
 
@@ -69,12 +70,84 @@ public:
 public:
 // 1. 时间： 超时相关设置
 
+    // 获取发送超时时间
+    int64_t getSendTimeout();
+    // 设置发送超时时间
+    void setSendTimeout();
+
+    // 获取接收超时时间
+    int64_t getRecvTimeout();
+    // 设置接收超时时间
+    void setRecvTimeout();
+
 // 2. 选项设置
 
+    // getsockopt
+    bool getOption(int level, int option, void * result, socklen_t * len);
+    template <typename T>
+    bool getOption(int level, int option, T & result) {
+        socklen_t length = sizeof(T);
+        return getOption(level, option, &result, length);
+    }
+
+    // setsockopt
+    bool setOption(int level, int option, const void * result, socklen_t * len);
+    template <typename T>
+    bool setOption(int level, int option, const T & result) {
+        socklen_t length = sizeof(T);
+        return getOption(level, option, &result, length);
+    }
 
 // 3. 流程： 初始化后的连接建立过程
 
+    // bind
+
+    // listen
+
+    // connect
+    // accept
+
+    // close
+
 // 4. 收发数据
+
+    // dump 输出信息到流中
+    std::ostream & dump(std::ostream & os) const;
+
+    //send
+
+    // sendTo
+
+    // recv
+
+    // recvfrom
+
+    // recvmsg
+
+// 5. 取消事件
+
+    // cancelRead
+
+    // cancelWrite
+
+    // cancelAccept
+
+    // cancelAll
+
+// 6. get
+    // getFamily
+
+    // getType
+
+    // getProtocol
+
+    // isConnected
+
+    // isValid
+
+    // getError
+
+
 
 
 private:
@@ -103,7 +176,9 @@ private:
 };
 
 
-std::ostream & operator<<(std::ostream & os, const Socket & sock);
+std::ostream & operator<<(std::ostream & os, const Socket & sock) {
+    return sock.dump(os);
+}
 
 
 }
