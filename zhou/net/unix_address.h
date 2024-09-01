@@ -47,7 +47,7 @@ public:
 
 private:
     sockaddr_un m_addr;
-    socklen_t m_length;
+    mutable socklen_t m_length;
 };
 
 }

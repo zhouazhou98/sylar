@@ -68,6 +68,7 @@ extern socket_fun_p socket_hook;
 // int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 typedef int (*connect_fun_p) (int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 extern connect_fun_p connect_hook;
+extern int  connect_with_timeout(int sockfd, const struct sockaddr * addr, socklen_t addrlen, uint64_t timeout_ms);
 
 // 2.3 accept
 // int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);

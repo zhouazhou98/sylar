@@ -18,8 +18,8 @@ public:
     // family: 协议簇 IPv4, IPv6, Unix, AX, Bluetooth, etc... 实际上是决定最终将数据从什么硬件发送出去
     // type: byte stream / datagram 使用字节流还是数据报 (不过 TCP 是使用字节流， UDP 使用数据报)
     // protocol: TCP / UDP 传输层协议
-    Socket(int family, int type, int protocol = 0);
-    Socket(Address::ptr addr, int type, int protocol = 0);
+    // Socket(Address::ptr addr, int type, int protocol = 0);
+    Socket(Address::ptr addr, int type, int protocol = 0, int sockfd = -1);
     ~Socket();
 
 public:
@@ -48,6 +48,7 @@ public:
     // 创建一个 UDP socket
     static Socket::ptr CreateUDP(zhou::Address::ptr address);
 
+/*
 // 网卡 TCP
     // 创建一个 IPv4 TCP socket
     static Socket::ptr CreateTCPSocket();
@@ -66,6 +67,8 @@ public:
     // 创建一个 Unix 的 UDP socket
     static Socket::ptr CreateUnixUDPSocket();
 
+*/
+
 
 public:
 // 1. 时间： 超时相关设置
@@ -73,12 +76,12 @@ public:
     // 获取发送超时时间
     int64_t getSendTimeout();
     // 设置发送超时时间
-    void setSendTimeout();
+    void setSendTimeout(int64_t v);
 
     // 获取接收超时时间
     int64_t getRecvTimeout();
     // 设置接收超时时间
-    void setRecvTimeout();
+    void setRecvTimeout(int64_t v);
 
 // 2. 选项设置
 
@@ -91,23 +94,28 @@ public:
     }
 
     // setsockopt
-    bool setOption(int level, int option, const void * result, socklen_t * len);
+    bool setOption(int level, int option, const void * result, socklen_t len);
     template <typename T>
     bool setOption(int level, int option, const T & result) {
         socklen_t length = sizeof(T);
-        return getOption(level, option, &result, length);
+        return setOption(level, option, &result, length);
     }
 
 // 3. 流程： 初始化后的连接建立过程
 
     // bind
-
-    // listen
+    bool bind();
 
     // connect
+    bool connect(const Address::ptr remote_addr, uint64_t timeout_ms = -1);
+
+    // listen
+    bool listen(int backlog = SOMAXCONN);
     // accept
+    Socket::ptr accept();
 
     // close
+    bool close();
 
 // 4. 收发数据
 
@@ -115,37 +123,61 @@ public:
     std::ostream & dump(std::ostream & os) const;
 
     //send
+    int send(const void *buf, size_t len, int flags = 0);
+    int send(const iovec *bufs, size_t len, int flags = 0);
 
-    // sendTo
+    // sendto
+    int sendto(const void *buf, size_t len, 
+                    const Address::ptr dest_addr, int flags = 0);
+    int sendto(const iovec *bufs, size_t len, 
+                    const Address::ptr dest_addr, int flags = 0);
+    
+    // sendmsg
 
     // recv
+    int recv(void *buf, size_t len, int flags = 0);
+    int recv(iovec *bufs, size_t len, int flags = 0);
 
     // recvfrom
+    int recvfrom(void *buf, size_t len, 
+                        const Address::ptr src_addr, int flags = 0);
+    int recvfrom(iovec *buf, size_t len, 
+                        const Address::ptr src_addr, int flags = 0);
 
     // recvmsg
 
 // 5. 取消事件
 
     // cancelRead
+    bool cancelRead();
 
     // cancelWrite
+    bool cancelWrite();
 
     // cancelAccept
+    bool cancelAccept();
 
     // cancelAll
+    bool cancelAll();
 
 // 6. get
     // getFamily
+    const int getFamily() const { return m_family; }
 
     // getType
+    const int getType() const { return m_type; }
 
     // getProtocol
+    const int getProtocol() const { return m_protocol; }
 
     // isConnected
+    const bool getIsConnected() const { return m_isConnected; }
 
     // isValid
+    bool isValid();
 
     // getError
+    int getError();
 
 
 

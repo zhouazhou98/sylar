@@ -53,7 +53,20 @@ sockaddr * UnixAddress::getAddr() {
 
 // 返回 sockaddr 长度
 const socklen_t UnixAddress::getAddrLen() const {
-    return m_length;
+    // Use strnlen to handle any form of string safely.
+    size_t actual_length;
+    // Include offsetof to ensure we consider the struct offset
+    if (m_addr.sun_path[0] == '\0') { // Abstract path
+        actual_length = strnlen(m_addr.sun_path + 1, sizeof(m_addr.sun_path)) + 1;
+        m_length = offsetof(sockaddr_un, sun_path) + actual_length;
+        return m_length;
+    } else { // Regular path
+        actual_length = strnlen(m_addr.sun_path, sizeof(m_addr.sun_path));
+        m_length = offsetof(sockaddr_un, sun_path) + actual_length + 1;
+        return m_length;
+        // return offsetof(sockaddr_un, sun_path) + actual_length + 1;  // include the null terminator
+    }
+    // return m_length;
 }
 
 // 可读性输出地址
