@@ -183,12 +183,12 @@ public:
 
 
 private:
-    // 初始化 socket
-    void initSocket();
+    // // 初始化 socket
+    // void initSocket();
     // 创建 socket
     void newSocket();
-    // 初始化 socket 句柄
-    bool init(int sock_fd);
+    // // 初始化 socket 句柄
+    // bool init(int sock_fd);
 
 private:
     // socket fd
