@@ -1,5 +1,5 @@
-#ifndef __ZHOU_HTTP_REQUEST_PARSER__
-#define __ZHOU_HTTP_REQUEST_PARSER__
+#ifndef __ZHOU_HTTP_REQUEST_PARSER_H__
+#define __ZHOU_HTTP_REQUEST_PARSER_H__
 
 #include "http_request.h"
 #include <memory>
@@ -29,6 +29,11 @@ public:
 
     void setError(int val) { m_error = val; }
 
+public:
+    static uint64_t GetHttpRequestBufferSize();
+
+    static uint64_t GetHttpRequestMaxBodySize();
+
 private:
     HttpRequest::ptr m_data;
     http_parser m_parser;
@@ -42,4 +47,4 @@ private:
 }
 }
 
-#endif // ! __ZHOU_HTTP_REQUEST_PARSER__
+#endif // ! __ZHOU_HTTP_REQUEST_PARSER_H__

@@ -1,5 +1,5 @@
-#ifndef __ZHOU_HTTP_REQUEST__
-#define __ZHOU_HTTP_REQUEST__
+#ifndef __ZHOU_HTTP_REQUEST_H__
+#define __ZHOU_HTTP_REQUEST_H__
 
 #include <memory>
 
@@ -19,4 +19,4 @@ private:
 }
 }
 
-#endif // ! __ZHOU_HTTP_REQUEST__
+#endif // ! __ZHOU_HTTP_REQUEST_H__
