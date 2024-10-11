@@ -1,6 +1,8 @@
 #ifndef __ZHOU_HTTP_METHOD_H__
 #define __ZHOU_HTTP_METHOD_H__
 
+#include <string>
+
 namespace zhou {
 namespace http {
 
@@ -56,6 +58,10 @@ enum class HttpMethod {
     INVALID_METHOD
 };
 
+HttpMethod StringToHttpMethod(const std::string & method);
+HttpMethod CharsToHttpMethod(const char * method);
+
+const char * HttpMethodToString(const HttpMethod & method);
 
 }
 }

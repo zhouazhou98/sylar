@@ -72,6 +72,7 @@ enum class HttpStatus {
 #undef XX
 };
 
+const char * HttpStatusToString(const HttpStatus & status);
 
 }
 }

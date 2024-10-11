@@ -52,6 +52,14 @@ set(LIB_SRC
     zhou/net/ipv6_address.cc                # IPv6 socket 地址封装
     zhou/net/unix_address.cc                # Unix socket 地址封装
     zhou/net/socket.cc                  # socket 封装
+    zhou/http/http_parser/http.cc
+    zhou/http/http_parser/http_parser.cc
+    zhou/http/http_parser/http_request/http_request.cc
+    zhou/http/http_parser/http_request/ragel/http11_parser.rl.cc
+    zhou/http/http_parser/http_request/http_request_parser.cc
+    zhou/http/http_parser/http_response/http_response.cc
+    zhou/http/http_parser/http_response/ragel/httpclient_parser.rl.cc
+    zhou/http/http_parser/http_response/http_response_parser.cc
     )
 
 
@@ -60,6 +68,22 @@ set(LIB_SRC
 include (cmake/utils.cmake)
 
 # --- 动态库 --- 
+set(BOOST_ROOT "/home/zhou/workspace/web_server/library/boost")
+set(BOOST_INCLUDEDIR "/home/zhou/workspace/web_server/library/boost/boost")
+set(BOOST_LIBRARYDIR "/home/zhou/workspace/web_server/library/boost/stage/lib")
+set(Boost_NO_SYSTEM_PATHS ON)
+
+find_package(Boost REQUIRED COMPONENTS filesystem system)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
+else()
+    message(FATAL_ERROR "Could not find Boost")
+endif()
+
+
+
 
 # 添加 .so 共享库 zhou ， 其使用 LIB_SRC 变量中的源文件构建而成
 add_library(zhou SHARED ${LIB_SRC})

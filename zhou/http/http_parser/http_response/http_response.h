@@ -1,6 +1,7 @@
 #ifndef __ZHOU_HTTP_RESPONSE_H__
 #define __ZHOU_HTTP_RESPONSE_H__
 
+#include "zhou/http/http_parser/http.h"
 #include <memory>
 
 namespace zhou {
