@@ -1,21 +1,27 @@
 #ifndef __ZHOU_HTTP_REQUEST_H__
 #define __ZHOU_HTTP_REQUEST_H__
 
+#include "zhou/http/http_parser/http.h"
+#include "zhou/http/http_parser/http_parser.h"
 #include <memory>
 #include <string>
 #include <map>
-#include "zhou/http/http_parser/http.h"
-#include "zhou/http/http_parser/http_parser.h"
 
 namespace zhou {
 namespace http {
+
+
+struct CaseInsensitiveLess {
+    bool operator() (const std::string & lhs, const std::string & rhs) const;
+};
+
 
 class HttpRequest {
 public:
     typedef std::shared_ptr<HttpRequest> ptr;
     typedef std::map<std::string, std::string, CaseInsensitiveLess> MapType;    // 比较时忽略大小写
     
-    HttpRequest();
+    HttpRequest(uint8_t version = 0x11, bool close = true);
 public:
 // get
     HttpMethod getMethod() const { return m_method; }

@@ -2,6 +2,7 @@
 #define __ZHOU_HTTP_METHOD_H__
 
 #include <string>
+#include <string.h>
 
 namespace zhou {
 namespace http {
@@ -58,10 +59,42 @@ enum class HttpMethod {
     INVALID_METHOD
 };
 
-HttpMethod StringToHttpMethod(const std::string & method);
-HttpMethod CharsToHttpMethod(const char * method);
 
-const char * HttpMethodToString(const HttpMethod & method);
+inline HttpMethod StringToHttpMethod(const std::string & method) {
+#define XX(num, name, string) \
+    if(strcmp(#string, method.c_str()) == 0) { \
+        return HttpMethod::name; \
+    }
+    HTTP_METHOD_MAP(XX);
+#undef XX
+    return HttpMethod::INVALID_METHOD;
+}
+
+inline HttpMethod CharsToHttpMethod(const char * method) {
+#define XX(num, name, string)                               \
+    if (strncmp(#string, method, strlen(#string)) == 0) {   \
+        return HttpMethod::name;                            \
+    }
+    HTTP_METHOD_MAP(XX)
+#undef XX
+
+    return HttpMethod::INVALID_METHOD;
+}
+
+
+static const char* s_method_string[] = {
+#define XX(num, name, string) #string,
+    HTTP_METHOD_MAP(XX)
+#undef XX
+};
+
+inline const char * HttpMethodToString(const HttpMethod & method) {
+    uint32_t idx = (uint32_t)method;
+    if(idx >= (sizeof(s_method_string) / sizeof(s_method_string[0]))) {
+        return "<unknown>";
+    }
+    return s_method_string[idx];
+}
 
 }
 }

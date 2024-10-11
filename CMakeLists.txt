@@ -57,6 +57,7 @@ set(LIB_SRC
     zhou/http/http_parser/http_request/http_request.cc
     zhou/http/http_parser/http_request/ragel/http11_parser.rl.cc
     zhou/http/http_parser/http_request/http_request_parser.cc
+    zhou/http/http_parser/http_request/http_request_callback.cc
     zhou/http/http_parser/http_response/http_response.cc
     zhou/http/http_parser/http_response/ragel/httpclient_parser.rl.cc
     zhou/http/http_parser/http_response/http_response_parser.cc
@@ -67,20 +68,6 @@ set(LIB_SRC
 
 include (cmake/utils.cmake)
 
-# --- 动态库 --- 
-set(BOOST_ROOT "/home/zhou/workspace/web_server/library/boost")
-set(BOOST_INCLUDEDIR "/home/zhou/workspace/web_server/library/boost/boost")
-set(BOOST_LIBRARYDIR "/home/zhou/workspace/web_server/library/boost/stage/lib")
-set(Boost_NO_SYSTEM_PATHS ON)
-
-find_package(Boost REQUIRED COMPONENTS filesystem system)
-
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${Boost_LIBRARY_DIRS})
-else()
-    message(FATAL_ERROR "Could not find Boost")
-endif()
 
 
 
@@ -96,6 +83,25 @@ force_redefine_file_macro_for_sources(zhou) #__FILE__
 # add_library(zhou_static STATIC ${LIB_SRC})
 # 将静态库 zhou_static 输出为 zhou.a
 # set_target_properties(zhou_static PROPERTIES OUTPUT_NAME "zhou")
+
+
+
+
+# --- 动态库 --- 
+set(BOOST_ROOT "/home/zhou/workspace/web_server/library/boost")
+set(BOOST_INCLUDEDIR "/home/zhou/workspace/web_server/library/boost/boost")
+set(BOOST_LIBRARYDIR "/home/zhou/workspace/web_server/library/boost/stage/lib")
+set(Boost_NO_SYSTEM_PATHS ON)
+
+find_package(Boost REQUIRED COMPONENTS filesystem system)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
+    target_link_libraries(zhou ${Boost_LIBRARIES})
+else()
+    message(FATAL_ERROR "Could not find Boost")
+endif()
 
 
 # --------------------------------------------------------
