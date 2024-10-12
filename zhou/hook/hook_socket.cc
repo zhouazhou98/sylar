@@ -141,7 +141,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     int fd = zhou::do_io(sockfd, accept_hook, "accept", zhou::IOManager::READ, SO_RCVTIMEO, addr, addrlen);
     if (fd >= 0) {
-        zhou::SingleFDManager::GetInstance()->get(sockfd, true);
+        zhou::SingleFDManager::GetInstance()->get(fd, true);
     }
     return fd;
 }

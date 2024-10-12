@@ -5,7 +5,7 @@
 
 namespace zhou {
 
-static Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 static uint64_t s_tcp_server_read_timeout = (uint64_t)(60 * 1000 * 2);
 
@@ -102,7 +102,9 @@ void TcpServer::startAccept(Socket::ptr sock) {
             m_worker->schedule(std::bind(
                 &TcpServer::handleClient, shared_from_this(), client_sock_fd
             ));
-        }  else {
+        }  else if (errno == EAGAIN) {
+            continue;
+        } else {
             ZHOU_ERROR(g_logger) << "accept errno=" << errno
                 << " errstr=" << strerror(errno);
         }
@@ -111,7 +113,40 @@ void TcpServer::startAccept(Socket::ptr sock) {
 
 void TcpServer::handleClient(Socket::ptr client_sock_fd) {
     ZHOU_INFO(g_logger) << "handleClient: " << *client_sock_fd;
+
+    // 定义接收缓冲区
+    char buffer[4096];
+    ssize_t bytes_received = client_sock_fd->recv(buffer, sizeof(buffer));
+    if (bytes_received > 0) {
+        std::string request(buffer, bytes_received);
+        ZHOU_INFO(g_logger) << "Received request:\n" << request;
+
+        // 构造 HTTP 响应头部
+        std::string response = "HTTP/1.1 200 OK\r\n";
+        response += "Content-Length: " + std::to_string(bytes_received) + "\r\n";
+        response += "Content-Type: text/plain\r\n";
+        response += "\r\n";
+
+        // 将客户端发送的数据作为响应正文
+        response += request;
+
+        // 发送响应给客户端
+        ssize_t bytes_sent = client_sock_fd->send(response.c_str(), response.size());
+        if (bytes_sent <= 0) {
+            ZHOU_ERROR(g_logger) << "发送数据失败，errno=" << errno
+                                 << ", errstr=" << strerror(errno);
+        }
+    } else if (bytes_received == 0) {
+        ZHOU_INFO(g_logger) << "客户端已关闭连接";
+    } else {
+        ZHOU_ERROR(g_logger) << "接收数据失败，errno=" << errno
+                             << ", errstr=" << strerror(errno);
+    }
+
+    // 处理完毕，关闭客户端连接
+    client_sock_fd->close();
 }
+
 
 
 }

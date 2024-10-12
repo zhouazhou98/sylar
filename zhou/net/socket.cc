@@ -8,6 +8,9 @@
 #include "zhou/log/log_manager.h"
 #include "zhou/utils/macro.h"
 #include "zhou/fiber/iomanager.h"
+#include "zhou/net/address.h"
+#include "zhou/net/ip_address.h"
+#include "zhou/net/unix_address.h"
 #include <string.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -52,6 +55,16 @@ Socket::Socket(Address::ptr addr, int type, int protocol, int sockfd) {
         m_remoteAddress = addr;         // 1. 设置远端地址
         
         socklen_t addr_len = m_remoteAddress->getAddrLen();
+        if (!m_localAddress) {
+            // ZHOU_DEBUG(g_logger) << "m_localAddress is nullptr";
+            if (m_family == AF_INET) {
+                m_localAddress = std::make_shared<IPv4Address>();
+            } else if (m_family == AF_INET6) {
+                m_localAddress = std::make_shared<IPv6Address>();
+            } else {
+                m_localAddress = std::make_shared<UnixAddress>();
+            }
+        }
         if (                            // 2. 设置本地地址
                 ( getsockname(m_sock_fd, m_localAddress->getAddr(), &addr_len) ) == -1 
         ) {
