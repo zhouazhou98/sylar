@@ -3,6 +3,7 @@
 
 #include "zhou/http/http_parser/http.h"
 #include "zhou/http/http_parser/http_parser.h"
+#include "zhou/http/http_parser/case_insensitive_less.h"
 #include <memory>
 #include <string>
 #include <map>
@@ -11,9 +12,9 @@ namespace zhou {
 namespace http {
 
 
-struct CaseInsensitiveLess {
-    bool operator() (const std::string & lhs, const std::string & rhs) const;
-};
+// struct CaseInsensitiveLess {
+//     bool operator() (const std::string & lhs, const std::string & rhs) const;
+// };
 
 
 class HttpRequest {

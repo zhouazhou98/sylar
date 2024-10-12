@@ -63,5 +63,3 @@ void on_response_http_field(void *data, const char *field, size_t flen
 
 }
 }
-
-#endif // !__ZHOU_HTTP_RESPONSE_CALLBACK_H__

@@ -1,6 +1,7 @@
 #ifndef __ZHOU_HTTP_RESPONSE_CALLBACK_H__
 #define __ZHOU_HTTP_RESPONSE_CALLBACK_H__
 
+#include <unistd.h>
 
 namespace zhou {
 namespace http {

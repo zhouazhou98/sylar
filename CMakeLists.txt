@@ -61,6 +61,7 @@ set(LIB_SRC
     zhou/http/http_parser/http_response/http_response.cc
     zhou/http/http_parser/http_response/ragel/httpclient_parser.rl.cc
     zhou/http/http_parser/http_response/http_response_parser.cc
+    zhou/http/http_parser/http_response/http_response_callback.cc
     )
 
 

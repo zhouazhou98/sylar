@@ -72,7 +72,19 @@ enum class HttpStatus {
 #undef XX
 };
 
-const char * HttpStatusToString(const HttpStatus & status);
+inline const char * HttpStatusToString(const HttpStatus & status) {
+    switch (status) {
+#define XX(code, name, msg)         \
+        case HttpStatus::name:      \
+            return #msg;
+
+        HTTP_STATUS_MAP(XX)
+#undef XX
+
+        default:
+            return "<Unknown>";
+    }
+}
 
 }
 }

@@ -1,3 +1,4 @@
+#include "zhou/http/http_parser/http_parser.h"
 #include "http_request.h"
 #include "http_request_parser.h"
 #include <sstream>
@@ -5,9 +6,9 @@
 namespace zhou {
 namespace http {
 
-bool CaseInsensitiveLess::operator() (const std::string & lhs, const std::string & rhs) const {
-    return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
-}
+// bool CaseInsensitiveLess::operator() (const std::string & lhs, const std::string & rhs) const {
+//     return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+// }
 
 
 
