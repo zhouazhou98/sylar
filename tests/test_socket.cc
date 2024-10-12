@@ -46,6 +46,16 @@ void test_socket() {
     // 6. 输出
     buffs.resize(rt);
     ZHOU_INFO(g_logger) << buffs;
+
+    // 7. http response parser 使用 parser 解析回复
+    zhou::http::HttpResponseParser parser;
+    size_t s = parser.execute(&buffs[0], buffs.size(), true);
+    buffs.resize(rt - s);
+    ZHOU_INFO(g_logger) << "buffer size: " << buffs.size();
+    ZHOU_INFO(g_logger) << parser.getData()->toString();
+    ZHOU_INFO(g_logger) << buffs;
+    ZHOU_INFO(g_logger) << parser.getData()->getHeader("server");
+
 }
 
 
