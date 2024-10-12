@@ -10,8 +10,8 @@ namespace zhou{
 FDCtx::FDCtx(int fd) : 
         m_isInit(false),
         m_isSocket(false),
-        m_sysNonblock(false),
-        m_userNonblock(false),
+        m_sysNonblock(true),
+        m_userNonblock(true),
         m_isClosed(false),
         m_fd(fd),
         m_recvTimeout(-1),

@@ -14,7 +14,7 @@
 
 namespace zhou {
 
-static Logger::ptr g_logger = SingleLoggerManager::GetInstance()->getLogger("system");
+static Logger::ptr g_logger = SingleLoggerManager::GetInstance()->getLogger("root");
 
 }
 
@@ -43,9 +43,13 @@ Socket::Socket(Address::ptr addr, int type, int protocol, int sockfd) {
         m_localAddress = addr;
         newSocket();
     } else {    // accept()
+        if (sockfd == 0) { 
+            newSocket(); 
+        } else { 
+            m_sock_fd = sockfd; 
+        }
         m_isConnected = true;
         m_remoteAddress = addr;         // 1. 设置远端地址
-        m_sock_fd = sockfd;
         
         socklen_t addr_len = m_remoteAddress->getAddrLen();
         if (                            // 2. 设置本地地址
@@ -66,12 +70,12 @@ Socket::~Socket() {
 
 // 创建 TCP/UDP Socket
 // 创建一个 TCP socket
-Socket::ptr CreateTCP(zhou::Address::ptr address) {
+Socket::ptr Socket::CreateTCP(zhou::Address::ptr address) {
     Socket::ptr sock(new Socket(address, Socket::Type::TCP, 0));
     return sock;
 }
 // 创建一个 UDP socket
-Socket::ptr CreateUDP(zhou::Address::ptr address) {
+Socket::ptr Socket::CreateUDP(zhou::Address::ptr address) {
     Socket::ptr sock(new Socket(address, Socket::Type::UDP, 0));
     return sock;
 }

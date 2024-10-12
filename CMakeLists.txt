@@ -27,18 +27,23 @@ include_directories(.)
 # 将源码文件设置到变量 LIB_SRC
 set(LIB_SRC
     zhou/log/log.cc                     # 日志模块
+
     zhou/utils/util.cc
+
     zhou/thread/thread.cc               # 线程模块
     zhou/thread/semaphore.cc                # 同步
     # zhou/thread/lock.cc                   # 互斥
+
     zhou/fiber/fiber.cc                 # 协程模块
     zhou/fiber/stack_allocator.cc           # 协程栈分配器
     zhou/fiber/scheduler.cc                 # 协程调度器（线程池）
     zhou/fiber/iomanager.cc                 # IO 协程调度器 - 协程 + epoll 配合
     zhou/fiber/iomanager_fd_ctx.cc          # IO 协程调度器 - event 上下文
     zhou/fiber/iomanager_timer.cc
+
     zhou/timer/timer.cc                 # 定时器
     zhou/timer/timer_manager.cc             # 定时器管理器
+    
     zhou/hook/hook.cc                   # IO hook 模块
     zhou/hook/hook_sleep.cc                 # sleep hook: sleep usleep nanosleep
     zhou/hook/fd_ctx.cc                     # socket etc ... IO 管理
@@ -47,11 +52,13 @@ set(LIB_SRC
     zhou/hook/hook_read.cc                  # read hook:  read  readv  recv recvfrom recvmsg
     zhou/hook/hook_write.cc                 # write hook: write writev send sendto   sendmsg
     zhou/hook/hook_fdctl.cc                 # fcntl hook: fcntl
+
     zhou/net/address.cc                 # socket 地址封装
     zhou/net/ipv4_address.cc                # IPv4 socket 地址封装
     zhou/net/ipv6_address.cc                # IPv6 socket 地址封装
     zhou/net/unix_address.cc                # Unix socket 地址封装
     zhou/net/socket.cc                  # socket 封装
+
     zhou/http/http_parser/http.cc
     zhou/http/http_parser/http_parser.cc
     zhou/http/http_parser/http_request/http_request.cc
@@ -251,6 +258,16 @@ target_link_libraries(${TEST_EXEC} zhou)
 
 # 生成测试文件 test                    
 set(TEST_EXEC test_http_parser)
+add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
+# 测试文件 test 依赖于我们生成的共享库 zhou.so  
+add_dependencies(${TEST_EXEC} zhou)      
+# __FILE__ 重定义
+force_redefine_file_macro_for_sources(${TEST_EXEC}) #__FILE__
+# 其链接时需要链接到 zhou.so 共享库          
+target_link_libraries(${TEST_EXEC} zhou) 
+
+# 生成测试文件 test                    
+set(TEST_EXEC test_socket)
 add_executable(${TEST_EXEC} tests/${TEST_EXEC}.cc)
 # 测试文件 test 依赖于我们生成的共享库 zhou.so  
 add_dependencies(${TEST_EXEC} zhou)      

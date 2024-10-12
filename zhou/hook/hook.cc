@@ -6,7 +6,7 @@
 #include "zhou/hook/fd_ctx.h"
 #include "zhou/hook/fd_manager.h"
 
-static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("system");
+static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
 namespace zhou {
 
@@ -122,7 +122,7 @@ retry:
         n = fun(fd, std::forward<Args>(args)...);
     }
 
-    if (n != -1 && errno != EAGAIN) {   // 连接失败，且返回值不是 -1（连接失败），且 errno 不是 EINPROGRESS（正在连接）
+    if (n == -1 && errno == EAGAIN) {   // 连接失败，且返回值不是 -1（连接失败），且 errno 不是 EINPROGRESS（正在连接）
         // 连接失败：重试
         // errno: 失败原因是 EAGAIN 
 

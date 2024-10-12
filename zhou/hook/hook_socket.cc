@@ -36,7 +36,7 @@ int socket(int domain, int type, int protocol) {
         return sock_fd;
     }
     zhou::SingleFDManager::GetInstance()->get(sock_fd, true);
-    return 0;
+    return sock_fd;
 }
 
 // 2.2 connet
@@ -62,7 +62,7 @@ int  connect_with_timeout(int sockfd, const struct sockaddr * addr, socklen_t ad
     int n = connect_hook(sockfd, addr, addrlen);
     if (n == 0) {   // 连接立即成功
         return 0;
-    } else if (n != -1 && errno != EINPROGRESS) {   // 连接失败，且返回值不是 -1（连接失败），且 errno 不是 EINPROGRESS（正在连接）
+    } else if (n != -1 || errno != EINPROGRESS) {   // 连接失败，且返回值不是 -1（连接失败），且 errno 不是 EINPROGRESS（正在连接）
         // 连接失败：需要
         // errno: 失败原因是 EINPROGRESS 正在连接
         return n;

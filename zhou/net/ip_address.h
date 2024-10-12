@@ -1,9 +1,9 @@
 #ifndef __ZHOU_IP_ADDRESS_H__
 #define __ZHOU_IP_ADDRESS_H__
 
+#include "address.h"
 #include <memory>
 #include <arpa/inet.h>
-#include "address.h"
 
 namespace zhou {
 

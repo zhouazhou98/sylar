@@ -37,6 +37,8 @@
 
 namespace zhou {
 
+class IPAddress;
+
 // 抽象基类， 没有自己的私有成员
 class Address {
 public:
@@ -61,7 +63,7 @@ public:
     static Address::ptr LookupAny(const std::string & host, 
                         int family = AF_INET, int type = 0, int protocol = 0);
     // 根据域名解析得到任意一个 IP 地址
-    static Address::ptr LookupAnyIPAddress(const std::string & host, 
+    static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string & host, 
                         int family = AF_INET, int type = 0, int protocol = 0);
 
     // 返回本机所有网卡的 <网卡名, 地址, 子网掩码位数>
