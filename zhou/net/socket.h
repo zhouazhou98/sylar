@@ -208,9 +208,7 @@ private:
 };
 
 
-std::ostream & operator<<(std::ostream & os, const Socket & sock) {
-    return sock.dump(os);
-}
+std::ostream & operator<<(std::ostream & os, const Socket & sock);
 
 
 }

@@ -279,7 +279,8 @@ bool Socket::listen(int backlog) {
 Socket::ptr Socket::accept() {
     Address::ptr remote_addr = Address::Create(m_localAddress->getAddr());
     // 2. accept
-    int new_sockfd = ::accept(m_sock_fd, remote_addr->getAddr(), (socklen_t *) sizeof(struct sockaddr));
+    socklen_t addr_len = remote_addr->getAddrLen();
+    int new_sockfd = ::accept(m_sock_fd, remote_addr->getAddr(), &addr_len /*sizeof(struct sockaddr)*/);
     if (new_sockfd == -1) {
         ZHOU_ERROR(g_logger) << "error accept socket fd = " << m_sock_fd 
                 << ", errno = " << errno << ", error str = " << strerror(errno);
@@ -519,5 +520,8 @@ void Socket::newSocket() {
 // 
 // }
 
+std::ostream & operator<<(std::ostream & os, const Socket & sock) {
+    return sock.dump(os);
+}
 
 }
