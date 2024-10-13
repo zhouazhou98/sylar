@@ -72,6 +72,8 @@ set(LIB_SRC
 
     zhou/http/server/tcp_server.cc
     zhou/http/server/http_server.cc
+    zhou/http/server/stream.cc
+    zhou/http/server/socket_stream.cc
     )
 
 
