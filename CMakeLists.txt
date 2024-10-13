@@ -79,6 +79,8 @@ set(LIB_SRC
     zhou/http/http_servlet/http_not_found_servlet.cc
     zhou/http/http_servlet/http_function_servlet.cc
     zhou/http/http_servlet/http_servlet_dispatch.cc
+
+    zhou/http/http_connection/http_connection.cc
     )
 
 

@@ -50,5 +50,6 @@
 #include "http/http_servlet/http_not_found_servlet.h"
 #include "http/http_servlet/http_servlet_dispatch.h"
 
+#include "http/http_connection/http_connection.h"
 
 #endif // ! __ZHOU_H__
