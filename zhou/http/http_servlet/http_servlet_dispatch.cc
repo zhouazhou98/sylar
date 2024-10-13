@@ -61,5 +61,55 @@ Servlet::ptr ServletDispatch::getMatchedServlet(const std::string & uri) {
 }
 
 
+
+// 增
+void ServletDispatch::addServlet(const std::string & uri, Servlet::ptr servlet) {
+    MutexType::WriteLock lock(m_mutex);
+    m_datas[uri] = servlet;
+}
+
+void ServletDispatch::addGlobServlet(const std::string & uri, Servlet::ptr servlet) {
+    MutexType::WriteLock lock(m_mutex);
+    for(auto it = m_globs.begin();
+            it != m_globs.end(); ++it) {
+        if(it->first == uri) {
+            m_globs.erase(it);
+            break;
+        }
+    }
+    m_globs.push_back(std::make_pair(uri, servlet));
+}
+
+    
+void ServletDispatch::addServlet(const std::string & uri, FunctionServlet::callback cb) {
+    MutexType::WriteLock lock(m_mutex);
+    m_datas[uri].reset(new FunctionServlet(cb));
+}
+
+void ServletDispatch::addGlobServlet(const std::string & uri, FunctionServlet::callback cb) {
+    addGlobServlet(uri, Servlet::ptr(new FunctionServlet(cb)));
+}
+
+
+// 删
+void ServletDispatch::delServlet(const std::string & uri) {
+    MutexType::WriteLock lock(m_mutex);
+    m_datas.erase(uri);
+}
+
+void ServletDispatch::delGlobServlet(const std::string & uri) {
+    MutexType::WriteLock lock(m_mutex);
+    for(auto it = m_globs.begin();
+            it != m_globs.end(); ++it) {
+        if(it->first == uri) {
+            m_globs.erase(it);
+            break;
+        }
+    }
+}
+
+
+
+
 }
 }
