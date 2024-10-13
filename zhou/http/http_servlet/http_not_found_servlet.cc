@@ -16,7 +16,6 @@ int32_t NotFoundServlet::handle(
     response->setStatus(zhou::http::HttpStatus::NOT_FOUND);
     response->setHeader("Server", "zhou/1.0.0");
     response->setHeader("Content-Type", "text/html");
-    response->setHeader("Content-Length", RESPONSE_BODY.c_str());
     response->setBody(RESPONSE_BODY);
 
     return 0;

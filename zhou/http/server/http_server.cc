@@ -13,7 +13,7 @@ HttpServer::HttpServer(     bool keepalive,
                     zhou::IOManager * accept_worker
 )       : TcpServer(worker, accept_worker), m_keepalive(keepalive)
 {
-
+    m_servletDispatch.reset(new ServletDispatch);
 }
 
 void HttpServer::handleClient(Socket::ptr client_sock_fd) {
@@ -35,10 +35,12 @@ void HttpServer::handleClient(Socket::ptr client_sock_fd) {
         );
 
         res->setHeader("Server", getName());
-        res->setBody(req->toString());
-        session->sendResponse(res);
+        m_servletDispatch->handle(req, res, session);
+        // res->setBody(req->toString());
 
         ZHOU_INFO(g_logger) << *res;
+
+        session->sendResponse(res);
     } while (m_keepalive);
 
     session->close();
