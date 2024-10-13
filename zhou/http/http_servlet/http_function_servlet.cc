@@ -3,6 +3,12 @@
 
 namespace zhou {
 namespace http {
+
+
+FunctionServlet::FunctionServlet(callback cb) 
+        : Servlet("FunctionServlet"), m_cb(cb) 
+{
+}
     
 int32_t FunctionServlet::handle(
                         zhou::http::HttpRequest::ptr request,

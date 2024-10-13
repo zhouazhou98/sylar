@@ -1,3 +1,6 @@
+#ifndef __ZHOU_HTTP_FUNCTION_SERVLET_H__
+#define __ZHOU_HTTP_FUNCTION_SERVLET_H__
+
 #include "http_servlet.h"
 #include <memory>
 #include <functional>
@@ -16,7 +19,9 @@ public:
                             )
                 > callback;
 
-    FunctionServlet(callback cb) : Servlet("FunctionServlet"), m_cb(cb) {}
+
+    FunctionServlet(callback cb); 
+
     virtual ~FunctionServlet() {}
 
 public:
@@ -32,3 +37,5 @@ private:
     
 }
 }
+
+#endif // ! __ZHOU_HTTP_FUNCTION_SERVLET_H__

@@ -45,5 +45,10 @@
 #include "http/server/stream.h"
 #include "http/server/http_session.h"
 
+#include "http/http_servlet/http_servlet.h"
+#include "http/http_servlet/http_function_servlet.h"
+#include "http/http_servlet/http_not_found_servlet.h"
+#include "http/http_servlet/http_servlet_dispatch.h"
+
 
 #endif // ! __ZHOU_H__
