@@ -38,6 +38,7 @@ void HttpServer::handleClient(Socket::ptr client_sock_fd) {
         m_servletDispatch->handle(req, res, session);
         // res->setBody(req->toString());
 
+        ZHOU_INFO(g_logger) << *req;
         ZHOU_INFO(g_logger) << *res;
 
         session->sendResponse(res);
