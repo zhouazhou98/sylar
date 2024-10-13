@@ -75,6 +75,10 @@ set(LIB_SRC
     zhou/http/server/stream.cc
     zhou/http/server/socket_stream.cc
     zhou/http/server/http_session.cc
+
+    zhou/http/http_servlet/http_not_found_servlet.cc
+    zhou/http/http_servlet/http_function_servlet.cc
+    zhou/http/http_servlet/http_servlet_dispatch.cc
     )
 
 
