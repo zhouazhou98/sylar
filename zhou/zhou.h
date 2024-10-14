@@ -52,5 +52,6 @@
 
 #include "http/http_connection/http_connection.h"
 #include "http/http_connection/http_result.h"
+#include "http/http_connection/http_connection_pool.h"
 
 #endif // ! __ZHOU_H__

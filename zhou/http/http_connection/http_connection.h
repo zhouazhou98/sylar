@@ -12,14 +12,25 @@
 namespace zhou {
 namespace http {
 
-class HttpConnection : SocketStream {
+class HttpConnection : public SocketStream {
 public:
     typedef std::shared_ptr<HttpConnection> ptr;
     HttpConnection(Socket::ptr sock, bool owner = true);
+    ~HttpConnection() {}
 
 public:
     int sendRequest(HttpRequest::ptr req);
     HttpResponse::ptr recvResponse();
+
+public:
+    uint64_t getCreateTime() const { return m_createTime; }
+    void setCreateTime(uint64_t val) { m_createTime = val; }
+    uint64_t getRequestCount() const { return m_requestCount; }
+    void setRequestCount(uint64_t val) { m_requestCount = val; }
+
+private:
+    uint64_t m_createTime = 0;
+    uint64_t m_requestCount = 0;    // 该单个连接请求的次数
 
 };
 
