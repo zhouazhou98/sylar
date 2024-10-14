@@ -81,6 +81,7 @@ set(LIB_SRC
     zhou/http/http_servlet/http_servlet_dispatch.cc
 
     zhou/http/http_connection/http_connection.cc
+    zhou/http/http_connection/http_result.cc
     )
 
 

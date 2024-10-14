@@ -51,5 +51,6 @@
 #include "http/http_servlet/http_servlet_dispatch.h"
 
 #include "http/http_connection/http_connection.h"
+#include "http/http_connection/http_result.h"
 
 #endif // ! __ZHOU_H__
