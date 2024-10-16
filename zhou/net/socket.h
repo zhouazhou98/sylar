@@ -161,6 +161,7 @@ public:
     bool cancelAll();
 
 // 6. get
+    const int getSockFD() const { return m_sock_fd; }
     // getFamily
     const int getFamily() const { return m_family; }
 
@@ -178,6 +179,9 @@ public:
 
     // getError
     int getError();
+
+    Address::ptr getLocalAddress() const { return m_localAddress; }
+    Address::ptr getRemoteAddress() const { return m_remoteAddress; }
 
 
 

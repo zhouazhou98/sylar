@@ -12,6 +12,7 @@ namespace zhou {
 namespace http {
 
 class HttpConnectionPool : public std::enable_shared_from_this<HttpConnectionPool> {
+    friend HttpConnection;
 public:
     typedef std::shared_ptr<HttpConnectionPool> ptr;
     typedef Mutex MutexType;

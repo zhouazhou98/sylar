@@ -7,20 +7,31 @@
 #include "zhou/http/http_parser/http_request/http_request.h"
 #include "zhou/http/http_parser/http_response/http_response.h"
 #include "zhou/http/server/socket_stream.h"
+#include "zhou/thread/lock.h"
 #include <memory>
+
 
 namespace zhou {
 namespace http {
 
-class HttpConnection : public SocketStream {
+class HttpConnectionPool;
+
+class HttpConnection : public SocketStream, std::enable_shared_from_this<HttpConnection> {
+friend HttpConnectionPool;
 public:
     typedef std::shared_ptr<HttpConnection> ptr;
+    typedef Mutex MutexType;
     HttpConnection(Socket::ptr sock, bool owner = true);
-    ~HttpConnection() {}
+    ~HttpConnection();
 
 public:
     int sendRequest(HttpRequest::ptr req);
     HttpResponse::ptr recvResponse();
+
+public:
+    void setConnectionPool(const std::shared_ptr<HttpConnectionPool>& pool) {
+        m_pool = pool;
+    }
 
 public:
     uint64_t getCreateTime() const { return m_createTime; }
@@ -31,6 +42,7 @@ public:
 private:
     uint64_t m_createTime = 0;
     uint64_t m_requestCount = 0;    // 该单个连接请求的次数
+    std::weak_ptr<HttpConnectionPool> m_pool;
 
 };
 

@@ -71,26 +71,98 @@ HttpConnection::ptr HttpConnectionPool::getConnection() {
             ZHOU_ERROR(g_logger) << "sock connect fail: " << addr->toString();
             return nullptr;
         }
-        ptr.reset(new HttpConnection(sock));
+        ZHOU_DEBUG(g_logger) << "sock fd: " << sock->getSockFD();
+        // ptr.reset(new HttpConnection(sock));
+        ptr = std::make_shared<HttpConnection>(sock);
+
+        m_conns.push_back(ptr);
 
         ++m_total;
+        ZHOU_INFO(g_logger) << "socket fd = " << sock->getSockFD();
+        ZHOU_INFO(g_logger) << "ptr conn socket fd = " << ptr->getSocket()->getSockFD();
     }
 
-    // return HttpConnection::ptr(ptr.get(), std::bind(&HttpConnectionPool::ReleasePtr, std::placeholders::_1, this));
-    auto self = shared_from_this();
-    return std::shared_ptr<HttpConnection>(ptr.get(), [this, self](HttpConnection* conn) {
-        this->ReleasePtr(std::shared_ptr<HttpConnection>(conn), self);
-    });
+    ptr->setConnectionPool(shared_from_this());
+    return ptr;
 
+    // return HttpConnection::ptr(ptr.get(), std::bind(&HttpConnectionPool::ReleasePtr, std::placeholders::_1, this));
+    // auto self = shared_from_this();
+    // auto ret = std::shared_ptr<HttpConnection>(ptr.get(), [this, self](HttpConnection* conn) {
+    //     this->ReleasePtr(std::shared_ptr<HttpConnection>(conn), self);
+    // });
+    // return ret;
 }
 
 // HttpResult::ptr HttpConnectionPool::doRequest(HttpMethod method, const std::string & url, uint64_t timeout_ms, const std::map<std::string, std::string> & headers = {}, const std::string & body = "");
 HttpResult::ptr HttpConnectionPool::doRequest(HttpRequest::ptr request, uint64_t timeout_ms) {
-    return nullptr;
+    auto conn = getConnection();
+    if (!conn) {
+        return std::make_shared<HttpResult>(
+            (int)HttpResult::Error::POOL_GET_CONNECTION,
+            nullptr,
+            "pool host: " + m_host + ", port: " + std::to_string(m_port)
+        );
+    }
+
+    auto sock = conn->getSocket();
+    ZHOU_INFO(g_logger) << "sock fd: " << sock->getSockFD();
+    if (!sock) {
+        return std::make_shared<HttpResult>(
+            (int)HttpResult::Error::POOL_INVALID_CONNECTION,
+            nullptr,
+            "pool host:" + m_host + " port:" + std::to_string(m_port)
+        );
+    }
+
+    if (!sock) {
+        ZHOU_ERROR(g_logger) << "error";
+    }
+
+    sock->setRecvTimeout(timeout_ms);
+
+
+    int rt = conn->sendRequest(request);
+    if(rt == 0) {
+        return std::make_shared<HttpResult>(
+            (int)HttpResult::Error::SEND_CLOSE_BY_PEER,
+            nullptr,
+            "send request closed by peer: " + sock->getRemoteAddress()->toString()
+        );
+    } else if(rt < 0) {
+        return std::make_shared<HttpResult>(
+            (int)HttpResult::Error::SEND_SOCKET_ERROR,
+            nullptr,
+            "send request socket error errno=" + std::to_string(errno) + " errstr=" + std::string(strerror(errno)));
+    }
+
+
+    auto res = conn->recvResponse();
+    if(!res) {
+        return std::make_shared<HttpResult>(
+            (int)HttpResult::Error::TIMEOUT,
+            nullptr,
+            "recv response timeout: " + sock->getRemoteAddress()->toString() + " timeout_ms:" + std::to_string(timeout_ms));
+    }
+    return std::make_shared<HttpResult>((int)HttpResult::Error::OK, res, "ok");
 }
 
 void HttpConnectionPool::ReleasePtr(HttpConnection::ptr conn, HttpConnectionPool::ptr pool) {
+    conn->setRequestCount(1 + conn->getRequestCount());
+    uint64_t now_ms = zhou::GetCurrentMS();
 
+    if (
+        !conn->isConnected() ||
+        (conn->getCreateTime() + pool->m_maxKeepAliveTime) <= now_ms ||
+        (conn->getRequestCount() >= pool->m_maxRequest)
+    ) {
+        --pool->m_total;
+        
+        return;
+    }
+
+    // 连接仍然有效
+    MutexType::Lock lock(pool->m_mutex);
+    pool->m_conns.push_back(conn);
 }
 
 

@@ -3,6 +3,7 @@
 #include "zhou/log/log_manager.h"
 #include "zhou/http/http_parser/http_request/http_request_parser.h"
 #include "zhou/http/http_parser/http_response/http_response_parser.h"
+#include "http_connection_pool.h"
 
 namespace zhou {
 namespace http {
@@ -12,6 +13,12 @@ static Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogge
 HttpConnection::HttpConnection(Socket::ptr sock, bool owner) 
         : SocketStream(sock, owner)
 {
+}
+HttpConnection::~HttpConnection() {
+    auto pool = m_pool.lock();
+    if (pool) {
+        HttpConnectionPool::ReleasePtr(shared_from_this(), pool);
+    }
 }
 
 int HttpConnection::sendRequest(HttpRequest::ptr req) {
@@ -114,27 +121,44 @@ HttpResponse::ptr HttpConnection::recvResponse() {
         parser->getData()->setBody(body);
     } else {
         int64_t length = parser->getContentLength();
+            //ZHOU_INFO(g_logger) << "content_len=" << client_parser.content_len;
+            ZHOU_INFO(g_logger) << "content_len=" << length;
         if (length > 0) {
             std::string body;
             body.reserve(length);
 
-            int len = 0;
             if (length >= offset) {
-                memcpy(&body[0], data, offset);
-                len = offset;
+                body.append(data, offset);
             } else {
-                memcpy(&body[0], data, length);
-                len = length;
+                body.append(data, length);
             }
             length -= offset;
             if (length > 0) {
-                if (readFixSize(&body[len], length) <= 0) {
-                    close();
+                if (readFixSize(&body[body.size()], length) <= 0) {
                     return nullptr;
                 }
             }
             parser->getData()->setBody(body);
         }
+        //     body.resize(length);
+
+        //     int len = 0;
+        //     if (length >= offset) {
+        //         memcpy(&body[0], data, offset);
+        //         len = offset;
+        //     } else {
+        //         memcpy(&body[0], data, length);
+        //         len = length;
+        //     }
+        //     length -= len;
+        //     if (length > 0) {
+        //         if (readFixSize(&body[len], length) <= 0) {
+        //             close();
+        //             return nullptr;
+        //         }
+        //     }
+        //     parser->getData()->setBody(body);
+        // }
     }
     return parser->getData();
 
