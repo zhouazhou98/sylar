@@ -13,7 +13,7 @@ static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->ge
 
 
 void test_http_connection_pool() {
-    zhou::IOManager::GetThis()->addTimer(3000, 
+    zhou::IOManager::GetThis()->addTimer(1000, 
             []() {
 
                 zhou::http::HttpRequest::ptr req = std::make_shared<zhou::http::HttpRequest>();
@@ -68,7 +68,7 @@ void test_http_connection() {
 }
 
 int main() {
-    zhou::IOManager::ptr iom(new zhou::IOManager(1, false));
+    zhou::IOManager::ptr iom(new zhou::IOManager(2, true));
 
     iom->start();
     // iom->schedule(test_http_connection);
