@@ -66,6 +66,7 @@ bool Address::Lookup(std::vector<Address::ptr> & result, const std::string & hos
     addrinfo hints;
     hints.ai_flags = 0;
     hints.ai_family = family;
+    hints.ai_socktype = type;
     hints.ai_protocol = protocol;
     hints.ai_addrlen = 0;
     hints.ai_canonname = NULL;

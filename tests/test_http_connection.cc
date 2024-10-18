@@ -3,29 +3,31 @@
 static zhou::Logger::ptr g_logger = zhou::SingleLoggerManager::GetInstance()->getLogger("root");
 
     zhou::http::HttpConnectionPool::ptr pool = std::make_shared<zhou::http::HttpConnectionPool> (
-            "www.baidu.com",
+            "www.sylar.top",
             "",
             80,
             10,
             1000 * 30,
-            20
+            3
     );
 
 
 void test_http_connection_pool() {
-    zhou::IOManager::GetThis()->addTimer(1000, 
+    zhou::IOManager::GetThis()->addTimer(3000, 
             []() {
 
-                zhou::http::HttpRequest::ptr req(new zhou::http::HttpRequest);
+                zhou::http::HttpRequest::ptr req = std::make_shared<zhou::http::HttpRequest>();
                 req->setPath("/");
                 req->setMethod(zhou::http::HttpMethod::GET);
                 req->setHeader("Host", "www.baidu.com");
+                req->setClose(false);
 
                 ZHOU_INFO(g_logger) << "request";
                 auto r = pool->doRequest(req, (uint64_t)300);
                 ZHOU_INFO(g_logger) << r->toString();
-                ZHOU_INFO(g_logger) << r->getHttpResponse()->getBody();
-            }
+                // ZHOU_INFO(g_logger) << r->getHttpResponse()->getBody();
+            }, 
+            true
     );
 
 }
@@ -66,10 +68,10 @@ void test_http_connection() {
 }
 
 int main() {
-    zhou::IOManager::ptr iom(new zhou::IOManager(1, true));
+    zhou::IOManager::ptr iom(new zhou::IOManager(1, false));
 
     iom->start();
-    iom->schedule(test_http_connection);
+    // iom->schedule(test_http_connection);
     iom->schedule(test_http_connection_pool);
     iom->stop();
 

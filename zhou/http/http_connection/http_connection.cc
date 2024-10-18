@@ -15,10 +15,31 @@ HttpConnection::HttpConnection(Socket::ptr sock, bool owner)
 {
 }
 HttpConnection::~HttpConnection() {
-    auto pool = m_pool.lock();
-    if (pool) {
-        HttpConnectionPool::ReleasePtr(shared_from_this(), pool);
-    }
+    ZHOU_INFO(g_logger) << "~HttpConnection-------------------------------------------------------------------------------------------------";
+    // if (pool) {
+    //     HttpConnectionPool::ReleasePtr(shared_from_this(), pool);
+    // }
+
+    // auto pool = m_pool.lock();
+    // if (pool) {
+
+    //     this->setRequestCount(1 + this->getRequestCount());
+    //     uint64_t now_ms = zhou::GetCurrentMS();
+
+    //     if (
+    //         !this->isConnected() ||
+    //         (this->getCreateTime() + pool->m_maxKeepAliveTime) <= now_ms ||
+    //         (this->getRequestCount() >= pool->m_maxRequest)
+    //     ) {
+    //         --pool->m_total;
+    //         
+    //         return;
+    //     }
+
+    //     // 连接仍然有效
+    //     MutexType::Lock lock(pool->m_mutex);
+    //     pool->m_conns.push_back(shared_from_this());
+    // }
 }
 
 int HttpConnection::sendRequest(HttpRequest::ptr req) {

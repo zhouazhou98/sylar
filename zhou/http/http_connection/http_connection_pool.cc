@@ -37,8 +37,8 @@ HttpConnection::ptr HttpConnectionPool::getConnection() {
 
         if (
             !conn->isConnected() ||
-            (conn->getCreateTime() + m_maxKeepAliveTime) <= now_ms // ||
-            // (conn->getRequestCount() >= m_maxRequest)
+            (conn->getCreateTime() + m_maxKeepAliveTime) >= now_ms ||
+            (conn->getRequestCount() >= m_maxRequest)
         ) {
             // invalid_conns.push_back(conn);
             continue;
@@ -55,6 +55,9 @@ HttpConnection::ptr HttpConnectionPool::getConnection() {
 
     if (!ptr) {
         IPAddress::ptr addr = Address::LookupAnyIPAddress(m_host);
+
+        // ZHOU_DEBUG(g_logger) << "addr: " << addr ? addr->toString() : "nullptr";
+        
         if (!addr) {
             ZHOU_ERROR(g_logger) << "get addr fail: " << m_host;
             return nullptr;
@@ -72,20 +75,31 @@ HttpConnection::ptr HttpConnectionPool::getConnection() {
             return nullptr;
         }
         ZHOU_DEBUG(g_logger) << "sock fd: " << sock->getSockFD();
+        
+        ptr = std::shared_ptr<HttpConnection>(new HttpConnection(sock),
+            [this](HttpConnection* conn) {
+                this->ReleasePtr(std::shared_ptr<HttpConnection>(conn), shared_from_this());
+            });
+        ++m_total;
+
         // ptr.reset(new HttpConnection(sock));
-        ptr = std::make_shared<HttpConnection>(sock);
+        // ptr = std::make_shared<HttpConnection>(sock);
 
         m_conns.push_back(ptr);
 
-        ++m_total;
         ZHOU_INFO(g_logger) << "socket fd = " << sock->getSockFD();
         ZHOU_INFO(g_logger) << "ptr conn socket fd = " << ptr->getSocket()->getSockFD();
     }
 
-    ptr->setConnectionPool(shared_from_this());
+    // ptr->setConnectionPool(shared_from_this());
     return ptr;
 
-    // return HttpConnection::ptr(ptr.get(), std::bind(&HttpConnectionPool::ReleasePtr, std::placeholders::_1, this));
+    // return HttpConnection::ptr( ptr,
+    //                             std::bind(  &HttpConnectionPool::ReleasePtr, 
+    //                                         std::placeholders::_1, 
+    //                                         this
+    //                                 )
+    //     );
     // auto self = shared_from_this();
     // auto ret = std::shared_ptr<HttpConnection>(ptr.get(), [this, self](HttpConnection* conn) {
     //     this->ReleasePtr(std::shared_ptr<HttpConnection>(conn), self);
@@ -152,13 +166,16 @@ void HttpConnectionPool::ReleasePtr(HttpConnection::ptr conn, HttpConnectionPool
 
     if (
         !conn->isConnected() ||
-        (conn->getCreateTime() + pool->m_maxKeepAliveTime) <= now_ms ||
+        (conn->getCreateTime() + pool->m_maxKeepAliveTime) >= now_ms ||
         (conn->getRequestCount() >= pool->m_maxRequest)
     ) {
         --pool->m_total;
         
         return;
     }
+
+    ZHOU_INFO(g_logger) << "Request count for current connection: " << conn->getRequestCount();
+
 
     // 连接仍然有效
     MutexType::Lock lock(pool->m_mutex);

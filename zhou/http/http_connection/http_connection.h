@@ -29,9 +29,9 @@ public:
     HttpResponse::ptr recvResponse();
 
 public:
-    void setConnectionPool(const std::shared_ptr<HttpConnectionPool>& pool) {
-        m_pool = pool;
-    }
+    // void setConnectionPool(const std::shared_ptr<HttpConnectionPool>& pool) {
+    //     m_pool = pool;
+    // }
 
 public:
     uint64_t getCreateTime() const { return m_createTime; }
@@ -42,7 +42,7 @@ public:
 private:
     uint64_t m_createTime = 0;
     uint64_t m_requestCount = 0;    // 该单个连接请求的次数
-    std::weak_ptr<HttpConnectionPool> m_pool;
+    // std::weak_ptr<HttpConnectionPool> m_pool;
 
 };
 
